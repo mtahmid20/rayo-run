@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { STORAGE_BUCKET } from "@/lib/constants";
+import { getProfileForUser, getUserCheckIns } from "@/lib/data";
+import { syncKlaviyoCheckIn } from "@/lib/klaviyo/server";
 import { getParticipantIdFromCookie } from "@/lib/session";
+import { calculateCurrentStreak } from "@/lib/streaks";
 import { createClient } from "@/lib/supabase/server";
 
 export type CheckInActionState = {
@@ -76,6 +79,34 @@ export async function createCheckIn(
   if (insertError) {
     await supabase.storage.from(STORAGE_BUCKET).remove([storagePath]);
     return { error: insertError.message };
+  }
+
+  try {
+    const [profile, updatedCheckIns] = await Promise.all([
+      getProfileForUser(supabase, participantId),
+      getUserCheckIns(supabase, participantId),
+    ]);
+
+    if (profile) {
+      const streak = calculateCurrentStreak(
+        updatedCheckIns.map((item) => item.check_in_date),
+      );
+
+      await syncKlaviyoCheckIn({
+        email: profile.email,
+        fullName: profile.full_name,
+        instagramHandle: profile.instagram_handle,
+        properties: {
+          participant_id: participantId,
+          current_streak: streak,
+          total_check_ins: updatedCheckIns.length,
+          last_check_in_date: localDate,
+          latest_check_in_caption: caption || null,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Klaviyo check-in sync failed", error);
   }
 
   revalidatePath("/dashboard");

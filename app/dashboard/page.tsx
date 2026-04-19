@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { CheckInForm } from "@/components/dashboard/check-in-form";
+import { DashboardIdentify } from "@/components/klaviyo/dashboard-identify";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import {
   DashboardCheckInItem,
@@ -43,9 +44,20 @@ export default async function DashboardPage() {
   const checkIns = await enrichCheckInsWithSignedUrls(supabase, rawCheckIns);
   const currentStreak = calculateCurrentStreak(checkIns.map((item) => item.check_in_date));
   const existingDates = checkIns.map((item) => item.check_in_date);
+  const publicApiKey = process.env.NEXT_PUBLIC_KLAVIYO_PUBLIC_API_KEY ?? null;
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,111,0,0.16),_transparent_24%),linear-gradient(180deg,_#0f0f0f_0%,_#050505_100%)] px-5 py-6 sm:px-6 lg:px-8">
+      <DashboardIdentify
+        publicApiKey={publicApiKey}
+        email={profile.email}
+        fullName={profile.full_name}
+        instagramHandle={profile.instagram_handle}
+        currentStreak={currentStreak}
+        totalCheckIns={checkIns.length}
+        lastCheckInDate={checkIns[0]?.check_in_date ?? null}
+      />
+
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -56,7 +68,7 @@ export default async function DashboardPage() {
               {profile.full_name}
             </h1>
             <p className="mt-2 text-sm text-white/65">
-              @{profile.instagram_handle} · {profile.email}
+              @{profile.instagram_handle} | {profile.email}
             </p>
           </div>
           <div className="flex gap-3">
@@ -98,7 +110,7 @@ export default async function DashboardPage() {
             <p className="font-mono text-xs uppercase tracking-[0.28em] text-[#f5b04c]">
               Daily action
             </p>
-            <p className="mt-4 text-2xl font-semibold text-white">Upload today’s proof</p>
+            <p className="mt-4 text-2xl font-semibold text-white">Upload today&apos;s proof</p>
             <p className="mt-2 text-sm text-white/68">
               One submission per user per local calendar day.
             </p>

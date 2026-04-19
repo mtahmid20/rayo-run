@@ -43,6 +43,9 @@ Create `.env.local` and set:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ADMIN_ACCESS_KEY=your_shared_admin_access_key
+NEXT_PUBLIC_KLAVIYO_PUBLIC_API_KEY=your_klaviyo_public_site_id
+KLAVIYO_PRIVATE_API_KEY=your_klaviyo_private_api_key
+KLAVIYO_LIST_ID=your_klaviyo_list_id
 ```
 
 ## Important note about the service role key
@@ -52,6 +55,29 @@ This app performs all Supabase reads, writes, and storage operations on the serv
 - Never expose the service role key in the browser
 - Keep it only in server environments such as `.env.local` and Netlify environment variables
 - Do not prefix it with `NEXT_PUBLIC_`
+
+## Klaviyo integration
+
+This app supports a mixed Klaviyo setup:
+
+- `NEXT_PUBLIC_KLAVIYO_PUBLIC_API_KEY` is used client-side to identify/update the participant profile from the dashboard
+- `KLAVIYO_PRIVATE_API_KEY` is used server-side for guaranteed profile updates and real list membership
+- `KLAVIYO_LIST_ID` is the Klaviyo list that new signups are added to
+
+Behavior:
+
+- On signup, the app creates or updates a Klaviyo profile server-side and adds it to your configured list
+- On each check-in, the app updates Klaviyo profile properties such as:
+  - `current_streak`
+  - `total_check_ins`
+  - `last_check_in_date`
+  - `latest_check_in_caption`
+
+You can find:
+
+- your public site ID in Klaviyo account settings under API keys
+- your private API key in the same API keys area
+- your list ID from the Klaviyo list URL or list settings
 
 ## Local setup
 
@@ -110,6 +136,9 @@ This is intentionally simple protection, not enterprise-grade auth.
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `ADMIN_ACCESS_KEY`
+   - `NEXT_PUBLIC_KLAVIYO_PUBLIC_API_KEY`
+   - `KLAVIYO_PRIVATE_API_KEY`
+   - `KLAVIYO_LIST_ID`
 4. Deploy
 
 The included [netlify.toml](/C:/Users/Tahmid/Documents/Codex/2026-04-20-build-a-production-ready-mvp-web/netlify.toml) keeps the build settings explicit.

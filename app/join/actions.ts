@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { syncKlaviyoSignup } from "@/lib/klaviyo/server";
 import { createClient } from "@/lib/supabase/server";
 import { clearParticipantCookie, setParticipantCookie } from "@/lib/session";
 
@@ -57,6 +58,19 @@ export async function saveParticipantIdentity(
 
   if (upsertError || !profile) {
     return { error: upsertError?.message ?? "Unable to save participant details." };
+  }
+
+  try {
+    await syncKlaviyoSignup({
+      email,
+      fullName,
+      instagramHandle,
+      properties: {
+        participant_id: profile.id,
+      },
+    });
+  } catch (error) {
+    console.error("Klaviyo signup sync failed", error);
   }
 
   await setParticipantCookie(profile.id);
