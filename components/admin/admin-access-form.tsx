@@ -12,13 +12,15 @@ export function AdminAccessForm() {
 
   return (
     <form action={action} className="space-y-4">
-      <label className="block space-y-2 text-sm text-white/72">
-        <span>Admin access key</span>
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+          Admin access key
+        </span>
         <input
           type="password"
           name="access_key"
           placeholder="Enter shared admin key"
-          className="min-h-12 w-full rounded-2xl border border-white/10 bg-black/35 px-4 text-white outline-none transition focus:border-[#ff6f00]"
+          className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
       </label>

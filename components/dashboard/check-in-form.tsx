@@ -49,7 +49,7 @@ export function CheckInForm({ existingDates }: CheckInFormProps) {
 
   if (alreadyCheckedInToday) {
     return (
-      <div className="rounded-[1.5rem] border border-emerald-500/20 bg-emerald-500/10 p-5">
+      <div className="rounded-lg border border-[var(--green)]/25 bg-[#0d2a1a] p-5">
         <p className="font-mono text-xs uppercase tracking-[0.28em] text-emerald-300">
           Complete
         </p>
@@ -68,24 +68,28 @@ export function CheckInForm({ existingDates }: CheckInFormProps) {
     <form action={action} className="space-y-4">
       <input type="hidden" name="local_date" value={today} />
 
-      <label className="block space-y-2 text-sm text-white/72">
-        <span>Photo proof</span>
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+          Photo proof
+        </span>
         <input
           type="file"
           name="photo"
           accept="image/*"
-          className="block min-h-12 w-full rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-[#ff6f00] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black focus:border-[#ff6f00]"
+          className="block min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 py-3 text-sm text-[var(--white)] outline-none transition file:mr-4 file:rounded-md file:border-0 file:bg-[var(--yellow)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-black focus:border-[var(--yellow)]"
           required
         />
       </label>
 
-      <label className="block space-y-2 text-sm text-white/72">
-        <span>Caption (optional)</span>
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+          Caption (optional)
+        </span>
         <textarea
           name="caption"
           placeholder="Morning miles before work. Felt strong."
           rows={4}
-          className="w-full rounded-[1.5rem] border border-white/10 bg-black/35 px-4 py-3 text-white outline-none transition focus:border-[#ff6f00]"
+          className="w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 py-3 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
         />
       </label>
 

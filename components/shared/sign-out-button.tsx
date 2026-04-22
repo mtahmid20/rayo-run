@@ -29,7 +29,7 @@ export function SignOutButton({ mode = "participant" }: SignOutButtonProps) {
           await clearParticipantIdentity();
         });
       }}
-      className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
+      className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#333] bg-transparent px-4 text-xs text-[var(--muted-2)] transition hover:border-[#555] hover:text-[var(--white)] disabled:cursor-not-allowed disabled:opacity-70"
       disabled={isPending}
     >
       {isPending

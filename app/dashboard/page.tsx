@@ -45,9 +45,10 @@ export default async function DashboardPage() {
   const currentStreak = calculateCurrentStreak(checkIns.map((item) => item.check_in_date));
   const existingDates = checkIns.map((item) => item.check_in_date);
   const publicApiKey = process.env.NEXT_PUBLIC_KLAVIYO_PUBLIC_API_KEY ?? null;
+  const firstName = profile.full_name.split(" ")[0] || profile.full_name;
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,111,0,0.16),_transparent_24%),linear-gradient(180deg,_#0f0f0f_0%,_#050505_100%)] px-5 py-6 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--black)] text-[var(--white)]">
       <DashboardIdentify
         publicApiKey={publicApiKey}
         email={profile.email}
@@ -58,116 +59,121 @@ export default async function DashboardPage() {
         lastCheckInDate={checkIns[0]?.check_in_date ?? null}
       />
 
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="flex flex-col gap-4 rounded-[2rem] border border-white/10 bg-white/5 p-5 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.35em] text-[#f5b04c]">
-              Athlete dashboard
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold text-white">
-              {profile.full_name}
-            </h1>
-            <p className="mt-2 text-sm text-white/65">
-              @{profile.instagram_handle} | {profile.email}
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Link
-              href="/"
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/12 px-4 text-sm font-medium text-white/80 transition hover:bg-white/8"
-            >
-              Landing page
-            </Link>
-            <SignOutButton />
-          </div>
-        </header>
+      <nav className="flex items-center justify-between border-b border-[#1f1f1f] bg-[var(--black-2)] px-5 py-4 sm:px-9">
+        <Link
+          href="/"
+          className="font-display text-3xl tracking-[0.1em] text-[var(--yellow)]"
+        >
+          RAYO
+        </Link>
+        <div className="flex items-center gap-4">
+          <p className="hidden text-sm text-[var(--muted-2)] sm:block">
+            Signed in as <span className="text-[var(--white)]">{profile.full_name}</span>
+          </p>
+          <SignOutButton />
+        </div>
+      </nav>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-[1.75rem] border border-white/10 bg-[#111111] p-5">
-            <p className="font-mono text-xs uppercase tracking-[0.28em] text-white/45">
-              Current streak
-            </p>
-            <p className="mt-4 text-4xl font-semibold text-white">{currentStreak}</p>
-            <p className="mt-2 text-sm text-white/60">Consecutive days completed</p>
+      <section className="max-w-6xl px-5 py-9 sm:px-9">
+        <div className="mb-8">
+          <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--yellow)]">
+            Ambassador portal
+          </p>
+          <h1 className="font-display text-6xl leading-none tracking-[0.03em] sm:text-7xl">
+            Welcome back, <span className="text-[var(--yellow)]">{firstName}</span>
+          </h1>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            @{profile.instagram_handle} | {profile.email}
+          </p>
+        </div>
+
+        <div className="mb-7 inline-flex items-center gap-2 rounded-md bg-[var(--yellow)] px-4 py-2 text-sm font-medium text-black">
+          <span className="font-display text-xl leading-none">Challenge Member</span>
+          <span>| Daily Proof Portal</span>
+        </div>
+
+        <section className="mb-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["Current Streak", currentStreak, "days in motion", true],
+            ["Total Check-ins", checkIns.length, "proof uploads", false],
+            ["Last Check-in", getLastCheckInLabel(checkIns), "recorded local date", false],
+            ["Today", existingDates.includes(new Date().toISOString().slice(0, 10)) ? "Done" : "Open", "daily action", true],
+          ].map(([label, value, sub, yellow]) => (
+            <div
+              key={label.toString()}
+              className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-5"
+            >
+              <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
+                {label}
+              </p>
+              <p
+                className={`font-display text-5xl leading-none ${
+                  yellow ? "text-[var(--yellow)]" : "text-[var(--white)]"
+                }`}
+              >
+                {value}
+              </p>
+              <p className="mt-1 text-xs text-[var(--muted)]">{sub}</p>
+            </div>
+          ))}
+        </section>
+
+        <section className="mb-6 rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <p className="text-sm font-medium">Streak Progress</p>
+            <p className="font-mono text-xs text-[var(--muted)]">Goal: 30 days</p>
           </div>
-          <div className="rounded-[1.75rem] border border-white/10 bg-[#111111] p-5">
-            <p className="font-mono text-xs uppercase tracking-[0.28em] text-white/45">
-              Total check-ins
-            </p>
-            <p className="mt-4 text-4xl font-semibold text-white">{checkIns.length}</p>
-            <p className="mt-2 text-sm text-white/60">Every proof upload stored</p>
+          <div className="h-2 overflow-hidden rounded bg-[var(--black-4)]">
+            <div
+              className="h-full rounded bg-[var(--yellow)] transition-all"
+              style={{ width: `${Math.min(100, Math.round((currentStreak / 30) * 100))}%` }}
+            />
           </div>
-          <div className="rounded-[1.75rem] border border-white/10 bg-[#111111] p-5">
-            <p className="font-mono text-xs uppercase tracking-[0.28em] text-white/45">
-              Last check-in
-            </p>
-            <p className="mt-4 text-2xl font-semibold text-white">
-              {getLastCheckInLabel(checkIns)}
-            </p>
-            <p className="mt-2 text-sm text-white/60">Based on your recorded local date</p>
-          </div>
-          <div className="rounded-[1.75rem] border border-[#ff6f00]/25 bg-[#1a1207] p-5">
-            <p className="font-mono text-xs uppercase tracking-[0.28em] text-[#f5b04c]">
-              Daily action
-            </p>
-            <p className="mt-4 text-2xl font-semibold text-white">Upload today&apos;s proof</p>
-            <p className="mt-2 text-sm text-white/68">
-              One submission per user per local calendar day.
-            </p>
+          <div className="mt-2 flex justify-between text-xs text-[var(--muted)]">
+            <span>{currentStreak} / 30</span>
+            <span>30</span>
           </div>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-[#0f0f0f] p-5">
-            <div className="mb-5">
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#f5b04c]">
-                Today&apos;s check-in
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold text-white">
-                Post proof and keep the streak alive
-              </h2>
-            </div>
+        <section className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
+            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
+              Submit UGC
+            </p>
             <CheckInForm existingDates={existingDates} />
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-[#0f0f0f] p-5">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <div>
-                <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#f5b04c]">
-                  Recent history
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">
-                  Your latest check-ins
-                </h2>
-              </div>
-            </div>
+          <div className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
+            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
+              Recent proof
+            </p>
 
             {checkIns.length ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {checkIns.map((item) => (
                   <article
                     key={item.id}
-                    className="grid gap-4 rounded-[1.5rem] border border-white/8 bg-black/30 p-4 sm:grid-cols-[140px_1fr]"
+                    className="grid gap-3 rounded-md bg-[var(--black-3)] p-3 sm:grid-cols-[110px_1fr]"
                   >
-                    <div className="overflow-hidden rounded-[1.2rem] border border-white/8 bg-white/5">
+                    <div className="overflow-hidden rounded-md bg-[var(--black-4)]">
                       {item.signedPhotoUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={item.signedPhotoUrl}
                           alt={`Check-in from ${item.check_in_date}`}
-                          className="h-32 w-full object-cover"
+                          className="h-28 w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-32 items-center justify-center text-sm text-white/50">
-                          Photo unavailable
+                        <div className="flex h-28 items-center justify-center text-xs text-[var(--muted)]">
+                          No photo
                         </div>
                       )}
                     </div>
                     <div>
-                      <p className="font-mono text-xs uppercase tracking-[0.28em] text-[#f5b04c]">
+                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--yellow)]">
                         {formatCheckInDate(item.check_in_date)}
                       </p>
-                      <p className="mt-3 text-sm leading-6 text-white/70">
+                      <p className="mt-2 text-sm leading-6 text-[var(--muted-2)]">
                         {item.caption || "No caption added for this day."}
                       </p>
                     </div>
@@ -175,14 +181,13 @@ export default async function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-[1.5rem] border border-dashed border-white/12 bg-black/20 p-6 text-sm leading-6 text-white/62">
-                No check-ins yet. Once the first proof photo is uploaded, your timeline
-                and streak will show up here.
+              <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-[var(--muted)]">
+                No proof yet. Submit today&apos;s upload to start the timeline.
               </div>
             )}
           </div>
         </section>
-      </div>
+      </section>
     </main>
   );
 }

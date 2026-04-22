@@ -11,68 +11,71 @@ export default async function JoinPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,111,0,0.22),_transparent_28%),linear-gradient(180deg,_#111111_0%,_#060606_100%)] px-5 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <div className="flex items-center justify-between">
-          <Link
-            href="/"
-            className="font-mono text-xs uppercase tracking-[0.35em] text-[#f5b04c]"
-          >
-            Rayo Challenge
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-white/12 px-4 py-2 text-sm text-white/75 transition hover:bg-white/8"
-          >
-            Back
-          </Link>
-        </div>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--black)] px-5 py-10 text-[var(--white)]">
+      <div className="rayo-noise pointer-events-none fixed inset-0 opacity-40" />
+      <div className="pointer-events-none absolute -right-10 top-12 font-display text-[260px] leading-none text-[#111] sm:text-[380px]">
+        C
+      </div>
 
-        <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur">
-            <p className="font-mono text-xs uppercase tracking-[0.32em] text-[#f5b04c]">
-              Join the movement
+      <section className="relative z-10 grid w-full max-w-6xl gap-0.5 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="border border-[#222] bg-[var(--black-2)] p-8 sm:p-12">
+          <Link
+            href="/"
+            className="font-display text-4xl tracking-[0.12em] text-[var(--yellow)]"
+          >
+            RAYO
+          </Link>
+          <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+            La Comunidad
+          </p>
+
+          <div className="mt-14">
+            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--yellow)]">
+              Join or return
             </p>
-            <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-              Create your challenge account once, then check in daily.
+            <h1 className="font-display text-6xl leading-none tracking-[0.03em] sm:text-7xl">
+              Enter the portal
             </h1>
-            <p className="mt-4 max-w-xl text-base leading-7 text-white/70">
-              This MVP skips formal auth. Participants identify themselves with
-              the same three fields every time: full name, email, and Instagram
-              handle. Once entered, we remember them on this device.
+            <p className="mt-5 max-w-md text-sm leading-7 text-[var(--muted-2)]">
+              No magic links. No complicated account system. Use the same name,
+              email, and Instagram handle to enter your Rayo challenge dashboard.
             </p>
-
-            <div className="mt-8 space-y-4">
-              <div className="rounded-2xl border border-white/8 bg-black/30 p-4">
-                <p className="text-sm font-semibold text-white">What happens next</p>
-                <p className="mt-2 text-sm leading-6 text-white/68">
-                  We save or update the participant record, store a simple local
-                  cookie, and send them straight to the dashboard.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/8 bg-black/30 p-4">
-                <p className="text-sm font-semibold text-white">Stored profile fields</p>
-                <p className="mt-2 text-sm leading-6 text-white/68">
-                  Full name, email, Instagram handle, daily check-ins, photo proof,
-                  caption, and streak-ready dates.
-                </p>
-              </div>
-            </div>
           </div>
 
-          <section className="rounded-[2rem] border border-white/10 bg-[#0f0f0f] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
-            <div className="mb-6">
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#f5b04c]">
-                Join or return
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold text-white">
-                Enter the same details and continue
-              </h2>
-            </div>
-            <ParticipantForm />
-          </section>
-        </section>
-      </div>
+          <div className="mt-10 space-y-3">
+            {[
+              "Submit your details once",
+              "Check in daily with proof",
+              "Keep the streak visible",
+            ].map((item) => (
+              <div
+                key={item}
+                className="border-l-2 border-[var(--yellow)] bg-[var(--black-3)] px-4 py-3 text-sm text-[var(--muted-2)]"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="border border-[#222] bg-[var(--black-2)] p-8 sm:p-12">
+          <div className="mb-8">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--yellow)]">
+              Application
+            </p>
+            <h2 className="mt-3 font-display text-5xl tracking-[0.03em]">
+              Start the streak
+            </h2>
+          </div>
+          <ParticipantForm />
+          <Link
+            href="/"
+            className="mt-6 block text-center text-xs text-[var(--muted)] hover:text-[var(--white)]"
+          >
+            Back to landing
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

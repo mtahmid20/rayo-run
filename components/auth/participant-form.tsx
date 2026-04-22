@@ -12,35 +12,41 @@ export function ParticipantForm() {
 
   return (
     <form action={action} className="space-y-4">
-      <label className="block space-y-2 text-sm text-white/72">
-        <span>Full name</span>
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+          Full name
+        </span>
         <input
           type="text"
           name="full_name"
           placeholder="Alex Runner"
-          className="min-h-12 w-full rounded-2xl border border-white/10 bg-black/35 px-4 text-white outline-none transition focus:border-[#ff6f00]"
+          className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
       </label>
 
-      <label className="block space-y-2 text-sm text-white/72">
-        <span>Email</span>
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+          Email
+        </span>
         <input
           type="email"
           name="email"
           placeholder="you@example.com"
-          className="min-h-12 w-full rounded-2xl border border-white/10 bg-black/35 px-4 text-white outline-none transition focus:border-[#ff6f00]"
+          className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
       </label>
 
-      <label className="block space-y-2 text-sm text-white/72">
-        <span>Instagram handle</span>
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+          Instagram handle
+        </span>
         <input
           type="text"
           name="instagram_handle"
           placeholder="@rayoathlete"
-          className="min-h-12 w-full rounded-2xl border border-white/10 bg-black/35 px-4 text-white outline-none transition focus:border-[#ff6f00]"
+          className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
       </label>

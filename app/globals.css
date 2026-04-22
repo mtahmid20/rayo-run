@@ -1,15 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #050505;
-  --foreground: #f5f5f5;
+  --background: #0a0a0a;
+  --foreground: #f8f5ee;
+  --black: #0a0a0a;
+  --black-2: #111111;
+  --black-3: #1a1a1a;
+  --black-4: #252525;
+  --black-5: #333333;
+  --yellow: #f5c400;
+  --yellow-dim: #c9a000;
+  --yellow-pale: #fdf3c0;
+  --red: #e03030;
+  --white: #f8f5ee;
+  --white-2: #e8e4da;
+  --muted: #666666;
+  --muted-2: #999999;
+  --green: #2dbe6c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", "SFMono-Regular", "Cascadia Code", monospace;
+  --font-sans: "DM Sans", "Avenir Next", "Segoe UI", sans-serif;
+  --font-mono: "DM Mono", "SFMono-Regular", "Cascadia Code", monospace;
+  --font-display: "Bebas Neue", "Impact", sans-serif;
 }
 
 * {
@@ -23,7 +39,9 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  font-family: "DM Sans", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 ::selection {
@@ -38,4 +56,20 @@ button {
 
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
+}
+
+.rayo-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+.font-display {
+  font-family: "Bebas Neue", "Impact", sans-serif;
+}
+
+.font-body {
+  font-family: "DM Sans", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.font-mono {
+  font-family: "DM Mono", "SFMono-Regular", "Cascadia Code", monospace;
 }
