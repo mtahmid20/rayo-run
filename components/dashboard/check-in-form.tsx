@@ -51,14 +51,14 @@ export function CheckInForm({ existingDates }: CheckInFormProps) {
     return (
       <div className="rounded-lg border border-[var(--green)]/25 bg-[#0d2a1a] p-5">
         <p className="font-mono text-xs uppercase tracking-[0.28em] text-emerald-300">
-          Complete
+          Rep logged
         </p>
         <h3 className="mt-3 text-2xl font-semibold text-white">
-          Today&apos;s check-in is already locked in.
+          Today&apos;s rep is already locked in.
         </h3>
         <p className="mt-3 text-sm leading-6 text-white/72">
-          Come back tomorrow for the next photo proof. Your timeline below already
-          includes today&apos;s submission.
+          Come back tomorrow for the next proof drop. Your feed below already
+          includes today&apos;s upload.
         </p>
       </div>
     );
@@ -87,7 +87,7 @@ export function CheckInForm({ existingDates }: CheckInFormProps) {
         </span>
         <textarea
           name="caption"
-          placeholder="Morning miles before work. Felt strong."
+          placeholder="Morning miles before work. Fuel felt great."
           rows={4}
           className="w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 py-3 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
         />
@@ -106,7 +106,7 @@ export function CheckInForm({ existingDates }: CheckInFormProps) {
       ) : null}
 
       <SubmitButton
-        label={isRefreshing ? "Refreshing dashboard..." : "Submit today’s check-in"}
+        label={isRefreshing ? "Refreshing portal..." : "Submit today's rep"}
         pendingLabel="Uploading proof..."
       />
     </form>

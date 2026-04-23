@@ -17,7 +17,7 @@ import { createClient } from "@/lib/supabase/server";
 
 function getLastCheckInLabel(checkIns: DashboardCheckInItem[]) {
   if (!checkIns.length) {
-    return "No check-ins yet";
+    return "No reps yet";
   }
 
   return formatCheckInDate(checkIns[0].check_in_date);
@@ -46,6 +46,8 @@ export default async function DashboardPage() {
   const existingDates = checkIns.map((item) => item.check_in_date);
   const publicApiKey = process.env.NEXT_PUBLIC_KLAVIYO_PUBLIC_API_KEY ?? null;
   const firstName = profile.full_name.split(" ")[0] || profile.full_name;
+  const today = new Date().toISOString().slice(0, 10);
+  const checkedInToday = existingDates.includes(today);
 
   return (
     <main className="min-h-screen bg-[var(--black)] text-[var(--white)]">
@@ -68,7 +70,7 @@ export default async function DashboardPage() {
         </Link>
         <div className="flex items-center gap-4">
           <p className="hidden text-sm text-[var(--muted-2)] sm:block">
-            Signed in as <span className="text-[var(--white)]">{profile.full_name}</span>
+            @{profile.instagram_handle} <span className="text-[var(--white)]">| {profile.full_name}</span>
           </p>
           <SignOutButton />
         </div>
@@ -77,27 +79,28 @@ export default async function DashboardPage() {
       <section className="max-w-6xl px-5 py-9 sm:px-9">
         <div className="mb-8">
           <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--yellow)]">
-            Ambassador portal
+            La Comunidad Portal
           </p>
           <h1 className="font-display text-6xl leading-none tracking-[0.03em] sm:text-7xl">
             Welcome back, <span className="text-[var(--yellow)]">{firstName}</span>
           </h1>
-          <p className="mt-2 text-sm text-[var(--muted)]">
-            @{profile.instagram_handle} | {profile.email}
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
+            Miles. Fuel. Rep. Keep showing up, log today&apos;s proof, and build
+            your streak one day at a time.
           </p>
         </div>
 
         <div className="mb-7 inline-flex items-center gap-2 rounded-md bg-[var(--yellow)] px-4 py-2 text-sm font-medium text-black">
-          <span className="font-display text-xl leading-none">Challenge Member</span>
-          <span>| Daily Proof Portal</span>
+          <span className="font-display text-xl leading-none">La Comunidad</span>
+          <span>| Ambassador check-in portal</span>
         </div>
 
         <section className="mb-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            ["Current Streak", currentStreak, "days in motion", true],
-            ["Total Check-ins", checkIns.length, "proof uploads", false],
-            ["Last Check-in", getLastCheckInLabel(checkIns), "recorded local date", false],
-            ["Today", existingDates.includes(new Date().toISOString().slice(0, 10)) ? "Done" : "Open", "daily action", true],
+            ["Current streak", currentStreak, "days in a row", true],
+            ["Total reps", checkIns.length, "proof uploads", false],
+            ["Last rep", getLastCheckInLabel(checkIns), "latest logged day", false],
+            ["Today", checkedInToday ? "Done" : "Open", "daily rep status", true],
           ].map(([label, value, sub, yellow]) => (
             <div
               key={label.toString()}
@@ -120,8 +123,8 @@ export default async function DashboardPage() {
 
         <section className="mb-6 rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <p className="text-sm font-medium">Streak Progress</p>
-            <p className="font-mono text-xs text-[var(--muted)]">Goal: 30 days</p>
+            <p className="text-sm font-medium">Road to 30</p>
+            <p className="font-mono text-xs text-[var(--muted)]">Goal: consistent daily reps</p>
           </div>
           <div className="h-2 overflow-hidden rounded bg-[var(--black-4)]">
             <div
@@ -137,15 +140,22 @@ export default async function DashboardPage() {
 
         <section className="grid gap-4 lg:grid-cols-2">
           <div className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
-            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
-              Submit UGC
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
+              Daily proof
+            </p>
+            <p className="mb-4 text-sm text-[var(--muted)]">
+              Upload today&apos;s photo and leave a note if you want to give the
+              rep some context.
             </p>
             <CheckInForm existingDates={existingDates} />
           </div>
 
           <div className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
-            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
-              Recent proof
+            <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
+              Recent reps
+            </p>
+            <p className="mb-4 text-sm text-[var(--muted)]">
+              Your latest uploads, captions, and proof from La Comunidad.
             </p>
 
             {checkIns.length ? (
@@ -174,7 +184,7 @@ export default async function DashboardPage() {
                         {formatCheckInDate(item.check_in_date)}
                       </p>
                       <p className="mt-2 text-sm leading-6 text-[var(--muted-2)]">
-                        {item.caption || "No caption added for this day."}
+                        {item.caption || "No caption added for this rep yet."}
                       </p>
                     </div>
                   </article>
@@ -182,7 +192,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-[var(--muted)]">
-                No proof yet. Submit today&apos;s upload to start the timeline.
+                No reps yet. Upload today&apos;s proof to start your feed.
               </div>
             )}
           </div>

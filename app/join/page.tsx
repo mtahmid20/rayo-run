@@ -31,22 +31,22 @@ export default async function JoinPage() {
 
           <div className="mt-14">
             <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--yellow)]">
-              Join or return
+              Miles. Fuel. Rep.
             </p>
             <h1 className="font-display text-6xl leading-none tracking-[0.03em] sm:text-7xl">
-              Enter the portal
+              Join the crew
             </h1>
             <p className="mt-5 max-w-md text-sm leading-7 text-[var(--muted-2)]">
-              No magic links. No complicated account system. Use the same name,
-              email, and Instagram handle to enter your Rayo challenge dashboard.
+              Join Rayo&apos;s ambassador program. Earn commissions, get product,
+              and help bring flavor back to the sport.
             </p>
           </div>
 
           <div className="mt-10 space-y-3">
             {[
-              "Submit your details once",
-              "Check in daily with proof",
-              "Keep the streak visible",
+              "Use the same name, email, and Instagram handle every time",
+              "Drop in daily with photo proof and an optional caption",
+              "Keep your streak moving and your reps visible",
             ].map((item) => (
               <div
                 key={item}
@@ -64,15 +64,20 @@ export default async function JoinPage() {
               Application
             </p>
             <h2 className="mt-3 font-display text-5xl tracking-[0.03em]">
-              Start the streak
+              Enter La Comunidad
             </h2>
+            <p className="mt-4 max-w-lg text-sm leading-7 text-[var(--muted-2)]">
+              Keep it simple. Put in your details below and we&apos;ll use them as
+              your portal identity whenever you come back to log miles, fuel,
+              and daily proof.
+            </p>
           </div>
           <ParticipantForm />
           <Link
             href="/"
             className="mt-6 block text-center text-xs text-[var(--muted)] hover:text-[var(--white)]"
           >
-            Back to landing
+            Back to La Comunidad
           </Link>
         </div>
       </section>

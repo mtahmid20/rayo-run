@@ -19,7 +19,7 @@ export function AdminAccessForm() {
         <input
           type="password"
           name="access_key"
-          placeholder="Enter shared admin key"
+          placeholder="Enter La Comunidad admin key"
           className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
@@ -31,7 +31,7 @@ export function AdminAccessForm() {
         </p>
       ) : null}
 
-      <SubmitButton label="Open admin dashboard" pendingLabel="Checking key..." />
+      <SubmitButton label="Enter admin portal" pendingLabel="Checking key..." />
     </form>
   );
 }

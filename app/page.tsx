@@ -4,30 +4,42 @@ import { redirect } from "next/navigation";
 import { getParticipantIdFromCookie } from "@/lib/session";
 
 const stats = [
-  ["30", "days to build proof"],
-  ["1", "check-in per day"],
-  ["100", "percent accountability"],
+  ["10%", "starting commission"],
+  ["2", "ambassador tiers"],
+  ["15%", "follower discount"],
+  ["$0", "cost to apply"],
 ];
 
 const tiers = [
   {
-    badge: "Tier 01",
-    name: "Rookie",
-    items: ["Start the streak", "Submit daily photo proof", "Track progress in your portal"],
-    goal: "Goal: show up daily",
+    badge: "Athletes - Tier 1",
+    name: "Tier 1",
+    items: [
+      "15% follower discount code",
+      "10% commission on all code sales",
+      "1-2 UGC posts/month required",
+      "Buy a box to activate",
+    ],
   },
   {
-    badge: "Tier 02",
-    name: "Elite",
+    badge: "Athletes - Tier 2",
+    name: "Tier 2",
     featured: true,
-    items: ["Protect the streak", "Stack consistent check-ins", "Build public momentum"],
-    goal: "Goal: no missed days",
+    items: [
+      "30% off all personal purchases",
+      "15% commission on all code sales",
+      "Keep 15% follower discount",
+      "2x UGC posts/month required",
+    ],
   },
   {
-    badge: "Community",
-    name: "Run Club",
-    items: ["Bring the crew", "Create shared accountability", "Turn check-ins into culture"],
-    goal: "Goal: move together",
+    badge: "Run Clubs",
+    name: "Clubs",
+    items: [
+      "20-40 free sample gels",
+      "20% club discount code",
+      "20% commission as store credit",
+    ],
   },
 ];
 
@@ -67,35 +79,74 @@ export default async function HomePage() {
         </div>
       </nav>
 
-      <section className="relative z-10 px-5 py-20 sm:px-12 lg:py-28">
-        <p className="mb-5 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.28em] text-[var(--yellow)] before:block before:h-px before:w-8 before:bg-[var(--yellow)]">
-          Rayo Ambassador Challenge
-        </p>
-        <h1 className="max-w-5xl font-display text-[82px] leading-[0.86] tracking-[0.03em] text-[var(--white)] sm:text-[130px]">
-          Join La <span className="text-[var(--yellow)]">Comunidad</span>
-        </h1>
-        <p className="mt-7 max-w-xl text-[17px] leading-8 text-[var(--muted-2)]">
-          A daily proof-of-work portal for athletes, creators, and run clubs who
-          want to build momentum with Rayo. Join once, check in every day, upload
-          the proof, and keep the streak alive.
-        </p>
-        <div className="mt-12 flex flex-wrap gap-3">
-          <Link
-            href="/join"
-            className="rounded-lg bg-[var(--yellow)] px-8 py-3.5 text-sm font-medium text-black transition hover:-translate-y-0.5 hover:bg-[var(--yellow-dim)]"
-          >
-            Join the Challenge
-          </Link>
-          <Link
-            href="#tiers"
-            className="rounded-lg border border-[#333] px-8 py-3.5 text-sm font-medium text-[var(--white)] transition hover:border-[#555] hover:bg-[var(--black-3)]"
-          >
-            See the Structure
-          </Link>
+      <section className="relative z-10 grid gap-14 px-5 py-20 sm:px-12 lg:grid-cols-[1.05fr_0.95fr] lg:py-28">
+        <div>
+          <p className="mb-4 font-mono text-xs uppercase tracking-[0.28em] text-[var(--yellow)]">
+            La Comunidad
+          </p>
+          <h1 className="max-w-5xl font-display text-[82px] leading-[0.86] tracking-[0.03em] text-[var(--white)] sm:text-[130px]">
+            Miles.
+            <br />
+            <span>Fuel</span>
+            <br />
+            <span className="text-[var(--yellow)]">REP.</span>
+          </h1>
+          <p className="mt-7 max-w-xl text-[17px] leading-8 text-[var(--muted-2)]">
+            Join Rayo&apos;s ambassador program. Earn commissions, get product,
+            and help bring flavor back to the sport.
+          </p>
+          <div className="mt-12 flex flex-wrap gap-3">
+            <Link
+              href="/join"
+              className="rounded-lg bg-[var(--yellow)] px-8 py-3.5 text-sm font-medium text-black transition hover:-translate-y-0.5 hover:bg-[var(--yellow-dim)]"
+            >
+              Join the Challenge
+            </Link>
+            <Link
+              href="#tiers"
+              className="rounded-lg border border-[#333] px-8 py-3.5 text-sm font-medium text-[var(--white)] transition hover:border-[#555] hover:bg-[var(--black-3)]"
+            >
+              See the Structure
+            </Link>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6 sm:p-8">
+          <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--yellow)]">
+            What is La Comunidad?
+          </p>
+          <div className="space-y-4 text-sm leading-7 text-[var(--muted-2)]">
+            <p>
+              La Comunidad is exactly that, a community. Where runners,
+              cyclists, everyday athletes chasing something bigger and enjoying
+              the miles while we&apos;re at it.
+            </p>
+            <p>
+              We care about how we fuel, how it tastes, how we move, and how we
+              show up for ourselves and our people. We all fell in love with
+              these sports for one reason or another and sometimes that gets
+              lost.
+            </p>
+            <p>
+              Although they&apos;re all different sports, we want to share more of
+              the feeling of joy when you&apos;re out there.
+            </p>
+            <p className="text-[var(--white)]">
+              We run together. We ride together. We fuel together.
+            </p>
+            <p>
+              Join our growing community of athletes making it happen every day.
+            </p>
+            <p className="text-[var(--white)]">
+              Siempre juntos.
+              <br />
+              Fuel the joy.
+            </p>
+          </div>
         </div>
       </section>
 
-      <section className="relative z-10 grid border-y border-[#1f1f1f] sm:grid-cols-3">
+      <section className="relative z-10 grid border-y border-[#1f1f1f] sm:grid-cols-4">
         {stats.map(([num, desc]) => (
           <div
             key={desc}
@@ -117,7 +168,7 @@ export default async function HomePage() {
             How it works
           </p>
           <h2 className="font-display text-6xl tracking-[0.03em] text-[var(--white)]">
-            Build the habit
+            Fuel the joy
           </h2>
         </div>
 
@@ -128,14 +179,14 @@ export default async function HomePage() {
               className={
                 tier.featured
                   ? "bg-[var(--yellow)] p-8 text-black"
-                  : "bg-[var(--black-2)] p-8 text-[var(--white)] transition hover:bg-[var(--black-3)]"
+                  : "group bg-[var(--black-2)] p-8 text-[var(--white)] transition hover:bg-[var(--yellow)] hover:text-black"
               }
             >
               <p
                 className={
                   tier.featured
                     ? "font-mono text-[11px] uppercase tracking-[0.2em] text-black/50"
-                    : "font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--muted)]"
+                    : "font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--muted)] transition group-hover:text-black/50"
                 }
               >
                 {tier.badge}
@@ -147,24 +198,25 @@ export default async function HomePage() {
                 {tier.items.map((item) => (
                   <li
                     key={item}
-                    className={tier.featured ? "text-black/70" : "text-[var(--muted-2)]"}
+                    className={
+                      tier.featured
+                        ? "text-black/70"
+                        : "text-[var(--muted-2)] transition group-hover:text-black/70"
+                    }
                   >
-                    <span className={tier.featured ? "text-black" : "text-[var(--yellow)]"}>
+                    <span
+                      className={
+                        tier.featured
+                          ? "text-black"
+                          : "text-[var(--yellow)] transition group-hover:text-black"
+                      }
+                    >
                       ✓
                     </span>{" "}
                     {item}
                   </li>
                 ))}
               </ul>
-              <p
-                className={
-                  tier.featured
-                    ? "mt-7 inline-block rounded bg-black/10 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-black/60"
-                    : "mt-7 inline-block rounded bg-white/5 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--muted)]"
-                }
-              >
-                {tier.goal}
-              </p>
             </article>
           ))}
         </div>
@@ -173,9 +225,12 @@ export default async function HomePage() {
       <section className="relative z-10 grid bg-[#111] lg:grid-cols-2">
         <div className="bg-[var(--black-2)] px-5 py-16 sm:px-12">
           <h2 className="font-display text-6xl">Athletes</h2>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-[var(--muted-2)]">
-            Enter your details, show up daily, and use photo proof to turn training
-            into visible consistency.
+          <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted-2)]">
+            For runners, cyclists, everyday endurance athletes chasing something
+            bigger and enjoying the miles while we&apos;re at it. We care about how
+            we fuel, how it tastes, how we move, and how we show up for
+            ourselves and our people. Earn commissions, get product, and level
+            up as you grow.
           </p>
           <Link
             href="/join"
@@ -186,10 +241,30 @@ export default async function HomePage() {
         </div>
         <div className="bg-[var(--yellow)] px-5 py-16 text-black sm:px-12">
           <h2 className="font-display text-6xl">Run Clubs</h2>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-black/60">
-            Bring your group into the ritual. Same portal, same proof, bigger
-            accountability.
-          </p>
+          <div className="mt-4 max-w-xl space-y-4 text-sm leading-7 text-black/70">
+            <p>
+              La Comunidad is exactly that, a community. Crews that show up
+              together, push each other, and make the miles mean more.
+            </p>
+            <p>
+              You&apos;re not just chasing miles, you&apos;re building something. A
+              culture, a rhythm, a reason people keep coming back.
+            </p>
+            <p>
+              We care about how we fuel, how we move, and how we show up for
+              each other every time we lace up.
+            </p>
+            <p>
+              If this sounds like your club, we&apos;d love to partner with you too.
+              Rayo is here to support the miles, the moments, and the people
+              behind them.
+            </p>
+            <p>
+              Siempre juntas.
+              <br />
+              Fuel the joy.
+            </p>
+          </div>
           <Link
             href="/join"
             className="mt-8 inline-flex rounded-md bg-black px-7 py-3 text-sm font-medium text-[var(--white)] hover:bg-[#222]"

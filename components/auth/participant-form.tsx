@@ -19,7 +19,7 @@ export function ParticipantForm() {
         <input
           type="text"
           name="full_name"
-          placeholder="Alex Runner"
+          placeholder="Your full name"
           className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
@@ -32,7 +32,7 @@ export function ParticipantForm() {
         <input
           type="email"
           name="email"
-          placeholder="you@example.com"
+          placeholder="Your email"
           className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
@@ -45,7 +45,7 @@ export function ParticipantForm() {
         <input
           type="text"
           name="instagram_handle"
-          placeholder="@rayoathlete"
+          placeholder="@yourhandle"
           className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
@@ -63,7 +63,7 @@ export function ParticipantForm() {
         </p>
       ) : null}
 
-      <SubmitButton label="Continue to dashboard" pendingLabel="Saving details..." />
+      <SubmitButton label="Enter La Comunidad" pendingLabel="Saving your spot..." />
     </form>
   );
 }
