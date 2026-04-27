@@ -8,6 +8,22 @@ create table if not exists public.profiles (
   created_at timestamptz not null default timezone('utc', now())
 );
 
+alter table public.profiles
+add column if not exists participant_type text;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'profiles_participant_type_check'
+  ) then
+    alter table public.profiles
+    add constraint profiles_participant_type_check
+    check (participant_type in ('athlete', 'club') or participant_type is null);
+  end if;
+end $$;
+
 create table if not exists public.check_ins (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,

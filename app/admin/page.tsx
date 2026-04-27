@@ -4,6 +4,7 @@ import { AdminAccessForm } from "@/components/admin/admin-access-form";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import {
   AdminCheckInItem,
+  ProfileRecord,
   enrichCheckInsWithSignedUrls,
   getAdminCheckIns,
   getAdminUserLookup,
@@ -16,16 +17,44 @@ import { createClient } from "@/lib/supabase/server";
 type AdminPageProps = {
   searchParams: Promise<{
     section?: string;
-    user?: string;
     date?: string;
+    type?: string;
   }>;
 };
 
 const adminSections = [
   { id: "overview", label: "Overview", description: "Big picture on La Comunidad" },
-  { id: "accounts", label: "Accounts", description: "Athletes, streaks, and activity" },
+  { id: "accounts", label: "Accounts", description: "Athletes, clubs, and activity" },
   { id: "images", label: "Images", description: "Proof uploads and captions" },
 ];
+
+type ParticipantTypeFilter = "all" | "athlete" | "club";
+type ParticipantType = "athlete" | "club";
+
+function inferParticipantType(profile: Pick<ProfileRecord, "participant_type" | "full_name"> | null | undefined): ParticipantType {
+  if (profile?.participant_type === "athlete" || profile?.participant_type === "club") {
+    return profile.participant_type;
+  }
+
+  const name = profile?.full_name.toLowerCase() ?? "";
+
+  if (
+    name.includes("club") ||
+    name.includes("crew") ||
+    name.includes("running club") ||
+    name.includes("run club")
+  ) {
+    return "club";
+  }
+
+  return "athlete";
+}
+
+function getParticipantTypeClasses(type: ParticipantType) {
+  return type === "club"
+    ? "border border-black/10 bg-black/10 text-black sm:border-[#333] sm:bg-[var(--black-4)] sm:text-[var(--yellow)]"
+    : "border border-[var(--yellow)]/25 bg-[var(--yellow)]/10 text-[var(--yellow)]";
+}
 
 function getStreaksByUser(checkIns: AdminCheckInItem[]) {
   const grouped = new Map<string, string[]>();
@@ -61,12 +90,12 @@ function getLatestDatesByUser(checkIns: AdminCheckInItem[]) {
   return grouped;
 }
 
-function getSectionLink(section: string, user?: string, date?: string) {
+function getSectionLink(section: string, type?: string, date?: string) {
   const params = new URLSearchParams();
   params.set("section", section);
 
-  if (user) {
-    params.set("user", user);
+  if (type && type !== "all") {
+    params.set("type", type);
   }
 
   if (date) {
@@ -76,11 +105,29 @@ function getSectionLink(section: string, user?: string, date?: string) {
   return `/admin?${params.toString()}`;
 }
 
+function filterProfilesByType(profiles: ProfileRecord[], type: ParticipantTypeFilter) {
+  if (type === "all") {
+    return profiles;
+  }
+
+  return profiles.filter((profile) => inferParticipantType(profile) === type);
+}
+
+function filterCheckInsByType(checkIns: AdminCheckInItem[], type: ParticipantTypeFilter) {
+  if (type === "all") {
+    return checkIns;
+  }
+
+  return checkIns.filter((item) => inferParticipantType(item.user) === type);
+}
+
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   const filters = await searchParams;
   const activeSection = adminSections.some((section) => section.id === filters.section)
     ? filters.section!
     : "overview";
+  const activeType: ParticipantTypeFilter =
+    filters.type === "athlete" || filters.type === "club" ? filters.type : "all";
   const isUnlocked = await hasAdminAccess();
 
   if (!isUnlocked) {
@@ -110,21 +157,25 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   }
 
   const supabase = await createClient();
-  const [userLookup, rawCheckIns] = await Promise.all([
+  const [allProfiles, rawCheckIns] = await Promise.all([
     getAdminUserLookup(supabase),
     getAdminCheckIns(supabase, {
-      userId: filters.user,
       date: filters.date,
     }),
   ]);
 
-  const checkIns = await enrichCheckInsWithSignedUrls(supabase, rawCheckIns);
-  const streaks = getStreaksByUser(rawCheckIns);
-  const checkInCounts = getCheckInCountsByUser(rawCheckIns);
-  const latestDates = getLatestDatesByUser(rawCheckIns);
-  const filteredUserLabel =
-    userLookup.find((profile) => profile.id === filters.user)?.full_name ??
-    (filters.user ? "Filtered" : "All");
+  const athleteCount = allProfiles.filter((profile) => inferParticipantType(profile) === "athlete").length;
+  const clubCount = allProfiles.filter((profile) => inferParticipantType(profile) === "club").length;
+  const visibleProfiles = filterProfilesByType(allProfiles, activeType);
+  const visibleProfileIds = new Set(visibleProfiles.map((profile) => profile.id));
+  const typeFilteredCheckIns = filterCheckInsByType(rawCheckIns, activeType).filter((item) =>
+    visibleProfileIds.has(item.user_id),
+  );
+
+  const checkIns = await enrichCheckInsWithSignedUrls(supabase, typeFilteredCheckIns);
+  const streaks = getStreaksByUser(typeFilteredCheckIns);
+  const checkInCounts = getCheckInCountsByUser(typeFilteredCheckIns);
+  const latestDates = getLatestDatesByUser(typeFilteredCheckIns);
 
   return (
     <main className="min-h-screen bg-[var(--black)] text-[var(--white)]">
@@ -144,7 +195,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               return (
                 <Link
                   key={section.id}
-                  href={getSectionLink(section.id, filters.user, filters.date)}
+                  href={getSectionLink(section.id, activeType, filters.date)}
                   className={
                     isActive
                       ? "rounded-md bg-[var(--yellow)] px-3 py-3 text-sm font-medium text-black"
@@ -171,8 +222,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               </p>
               <h1 className="font-display text-6xl leading-none">La Comunidad Admin</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-                Review athletes, proof uploads, and streak movement across the
-                ambassador program in one place.
+                Review athletes, clubs, proof uploads, and streak movement across
+                the ambassador program in one place.
               </p>
             </div>
             <div className="flex gap-2">
@@ -180,7 +231,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 href="/dashboard"
                 className="rounded-md border border-[#333] px-4 py-2 text-xs text-[var(--muted-2)] hover:border-[#555] hover:text-[var(--white)]"
               >
-                Athlete portal
+                Member portal
               </Link>
               <div className="lg:hidden">
                 <SignOutButton mode="admin" />
@@ -195,7 +246,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               return (
                 <Link
                   key={section.id}
-                  href={getSectionLink(section.id, filters.user, filters.date)}
+                  href={getSectionLink(section.id, activeType, filters.date)}
                   className={
                     isActive
                       ? "rounded-md bg-[var(--yellow)] px-4 py-2 text-xs font-medium text-black"
@@ -208,12 +259,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             })}
           </div>
 
-          <section className="mb-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <section className="mb-8 grid gap-3 sm:grid-cols-3">
             {[
-              ["Athletes", userLookup.length],
-              ["Visible reps", checkIns.length],
-              ["Filter athlete", filteredUserLabel],
-              ["Filter date", filters.date || "All"],
+              ["Total athletes", athleteCount],
+              ["Total clubs", clubCount],
+              ["Total accounts", allProfiles.length],
             ].map(([label, value], index) => (
               <div
                 key={label.toString()}
@@ -224,7 +274,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 </p>
                 <p
                   className={`mt-2 font-display text-5xl leading-none ${
-                    index === 0 ? "text-[var(--yellow)]" : "text-[var(--white)]"
+                    index < 2 ? "text-[var(--yellow)]" : "text-[var(--white)]"
                   }`}
                 >
                   {value}
@@ -239,7 +289,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 Filters
               </p>
               <p className="mt-1 text-sm text-[var(--muted)]">
-                Narrow the view by athlete or date without losing your current section.
+                Filter the admin view by participant type or check-in date.
               </p>
             </div>
 
@@ -248,19 +298,16 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
               <label className="space-y-2">
                 <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
-                  Filter by athlete
+                  Filter by type
                 </span>
                 <select
-                  name="user"
-                  defaultValue={filters.user ?? ""}
+                  name="type"
+                  defaultValue={activeType}
                   className="min-h-11 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-3 text-sm text-[var(--white)] outline-none focus:border-[var(--yellow)]"
                 >
-                  <option value="">All athletes</option>
-                  {userLookup.map((profile) => (
-                    <option key={profile.id} value={profile.id}>
-                      {profile.full_name || profile.email || profile.id}
-                    </option>
-                  ))}
+                  <option value="all">All</option>
+                  <option value="athlete">Athletes</option>
+                  <option value="club">Clubs</option>
                 </select>
               </label>
 
@@ -301,18 +348,27 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                     Top streaks
                   </p>
                   <p className="mt-1 text-sm text-[var(--muted)]">
-                    Fast view of the athletes showing up most consistently.
+                    Fast view of the most consistent athletes and clubs.
                   </p>
                 </div>
 
                 <div className="space-y-3">
-                  {userLookup.slice(0, 8).map((profile) => {
+                  {visibleProfiles.slice(0, 8).map((profile) => {
                     const userDates = streaks.get(profile.id) ?? [];
+                    const participantType = inferParticipantType(profile);
+
                     return (
                       <article key={profile.id} className="rounded-md bg-[var(--black-3)] p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="font-medium text-[var(--white)]">{profile.full_name}</p>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="font-medium text-[var(--white)]">{profile.full_name}</p>
+                              <span
+                                className={`rounded-full px-2 py-1 text-[10px] uppercase tracking-[0.16em] ${getParticipantTypeClasses(participantType)}`}
+                              >
+                                {participantType}
+                              </span>
+                            </div>
                             <p className="mt-1 text-xs text-[var(--muted)]">
                               {profile.email} | @{profile.instagram_handle}
                             </p>
@@ -339,44 +395,55 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
                 {checkIns.length ? (
                   <div className="space-y-3">
-                    {checkIns.slice(0, 6).map((item) => (
-                      <article
-                        key={item.id}
-                        className="grid gap-4 rounded-md bg-[var(--black-3)] p-4 md:grid-cols-[130px_1fr]"
-                      >
-                        <div className="overflow-hidden rounded-md bg-[var(--black-4)]">
-                          {item.signedPhotoUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={item.signedPhotoUrl}
-                              alt={`Proof from ${item.user?.full_name ?? item.user?.email ?? "athlete"}`}
-                              className="h-32 w-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex h-32 items-center justify-center text-xs text-[var(--muted)]">
-                              No photo
+                    {checkIns.slice(0, 6).map((item) => {
+                      const participantType = inferParticipantType(item.user);
+
+                      return (
+                        <article
+                          key={item.id}
+                          className="grid gap-4 rounded-md bg-[var(--black-3)] p-4 md:grid-cols-[130px_1fr]"
+                        >
+                          <div className="overflow-hidden rounded-md bg-[var(--black-4)]">
+                            {item.signedPhotoUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={item.signedPhotoUrl}
+                                alt={`Proof from ${item.user?.full_name ?? item.user?.email ?? "participant"}`}
+                                className="h-32 w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-32 items-center justify-center text-xs text-[var(--muted)]">
+                                No photo
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="font-medium text-[var(--white)]">
+                                {item.user?.full_name || "Unnamed participant"}
+                              </p>
+                              <span
+                                className={`rounded-full px-2 py-1 text-[10px] uppercase tracking-[0.16em] ${getParticipantTypeClasses(participantType)}`}
+                              >
+                                {participantType}
+                              </span>
                             </div>
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-medium text-[var(--white)]">
-                            {item.user?.full_name || "Unnamed athlete"}
-                          </p>
-                          <p className="mt-1 text-xs text-[var(--muted)]">
-                            {item.user?.email || "No email"}
-                            {item.user?.instagram_handle
-                              ? ` | @${item.user.instagram_handle}`
-                              : ""}
-                          </p>
-                          <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--yellow)]">
-                            {formatCheckInDate(item.check_in_date)}
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-[var(--muted-2)]">
-                            {item.caption || "No caption provided."}
-                          </p>
-                        </div>
-                      </article>
-                    ))}
+                            <p className="mt-1 text-xs text-[var(--muted)]">
+                              {item.user?.email || "No email"}
+                              {item.user?.instagram_handle
+                                ? ` | @${item.user.instagram_handle}`
+                                : ""}
+                            </p>
+                            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--yellow)]">
+                              {formatCheckInDate(item.check_in_date)}
+                            </p>
+                            <p className="mt-2 text-sm leading-6 text-[var(--muted-2)]">
+                              {item.caption || "No caption provided."}
+                            </p>
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-[var(--muted)]">
@@ -394,20 +461,29 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                   Accounts
                 </p>
                 <p className="mt-1 text-sm text-[var(--muted)]">
-                  Athlete roster with streaks, total reps, and latest activity.
+                  Athlete and club roster with visible type tags, streaks, and latest activity.
                 </p>
               </div>
 
               <div className="space-y-3">
-                {userLookup.map((profile) => {
+                {visibleProfiles.map((profile) => {
                   const userDates = streaks.get(profile.id) ?? [];
+                  const participantType = inferParticipantType(profile);
+
                   return (
                     <article
                       key={profile.id}
-                      className="grid gap-4 rounded-md bg-[var(--black-3)] p-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]"
+                      className="grid gap-4 rounded-md bg-[var(--black-3)] p-4 lg:grid-cols-[1.3fr_0.7fr_0.7fr_0.8fr]"
                     >
                       <div>
-                        <p className="font-medium text-[var(--white)]">{profile.full_name}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-medium text-[var(--white)]">{profile.full_name}</p>
+                          <span
+                            className={`rounded-full px-2 py-1 text-[10px] uppercase tracking-[0.16em] ${getParticipantTypeClasses(participantType)}`}
+                          >
+                            {participantType}
+                          </span>
+                        </div>
                         <p className="mt-1 text-xs text-[var(--muted)]">
                           {profile.email} | @{profile.instagram_handle}
                         </p>
@@ -452,44 +528,55 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                   Images
                 </p>
                 <p className="mt-1 text-sm text-[var(--muted)]">
-                  Proof uploads, captions, and the faces behind the miles.
+                  Proof uploads, captions, and clear athlete or club tags on every card.
                 </p>
               </div>
 
               {checkIns.length ? (
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {checkIns.map((item) => (
-                    <article
-                      key={item.id}
-                      className="overflow-hidden rounded-md bg-[var(--black-3)]"
-                    >
-                      <div className="aspect-[4/3] bg-[var(--black-4)]">
-                        {item.signedPhotoUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={item.signedPhotoUrl}
-                            alt={`Proof from ${item.user?.full_name ?? item.user?.email ?? "athlete"}`}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-xs text-[var(--muted)]">
-                            No photo
+                  {checkIns.map((item) => {
+                    const participantType = inferParticipantType(item.user);
+
+                    return (
+                      <article
+                        key={item.id}
+                        className="overflow-hidden rounded-md bg-[var(--black-3)]"
+                      >
+                        <div className="aspect-[4/3] bg-[var(--black-4)]">
+                          {item.signedPhotoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={item.signedPhotoUrl}
+                              alt={`Proof from ${item.user?.full_name ?? item.user?.email ?? "participant"}`}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-xs text-[var(--muted)]">
+                              No photo
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-medium text-[var(--white)]">
+                              {item.user?.full_name || "Unnamed participant"}
+                            </p>
+                            <span
+                              className={`rounded-full px-2 py-1 text-[10px] uppercase tracking-[0.16em] ${getParticipantTypeClasses(participantType)}`}
+                            >
+                              {participantType}
+                            </span>
                           </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <p className="font-medium text-[var(--white)]">
-                          {item.user?.full_name || "Unnamed athlete"}
-                        </p>
-                        <p className="mt-1 text-xs text-[var(--muted)]">
-                          {formatCheckInDate(item.check_in_date)}
-                        </p>
-                        <p className="mt-3 text-sm leading-6 text-[var(--muted-2)]">
-                          {item.caption || "No caption provided."}
-                        </p>
-                      </div>
-                    </article>
-                  ))}
+                          <p className="mt-1 text-xs text-[var(--muted)]">
+                            {formatCheckInDate(item.check_in_date)}
+                          </p>
+                          <p className="mt-3 text-sm leading-6 text-[var(--muted-2)]">
+                            {item.caption || "No caption provided."}
+                          </p>
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-[var(--muted)]">

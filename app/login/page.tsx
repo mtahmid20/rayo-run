@@ -37,7 +37,7 @@ export default async function LoginPage() {
               Welcome back
             </h1>
             <p className="mt-5 max-w-md text-sm leading-7 text-[var(--muted-2)]">
-              Returning clubs can get back in fast with just email and Instagram.
+              Returning athletes and clubs can get back in fast with just email and Instagram.
             </p>
           </div>
 
@@ -72,7 +72,7 @@ export default async function LoginPage() {
           <LoginForm />
           <div className="mt-6 flex flex-col gap-3 text-center text-xs text-[var(--muted)]">
             <Link href="/join" className="hover:text-[var(--white)]">
-              New club? Apply to the program
+              New here? Apply to the program
             </Link>
             <Link href="/" className="hover:text-[var(--white)]">
               Back to La Comunidad

@@ -7,6 +7,7 @@ export type ProfileRecord = {
   full_name: string;
   email: string;
   instagram_handle: string;
+  participant_type?: "athlete" | "club" | null;
   created_at?: string;
 };
 
@@ -21,25 +22,53 @@ export type DashboardCheckInItem = {
 };
 
 export type AdminCheckInItem = DashboardCheckInItem & {
-  user?: Pick<ProfileRecord, "id" | "full_name" | "email" | "instagram_handle"> | null;
+  user?: Pick<
+    ProfileRecord,
+    "id" | "full_name" | "email" | "instagram_handle" | "participant_type"
+  > | null;
 };
 
 type AdminFilters = {
-  userId?: string;
   date?: string;
 };
+
+function hasMissingParticipantTypeColumn(error: { message?: string } | null) {
+  const message = error?.message?.toLowerCase() ?? "";
+  return message.includes("participant_type") && message.includes("column");
+}
 
 export async function getProfileForUser(
   supabase: SupabaseClient,
   userId: string,
 ): Promise<ProfileRecord | null> {
-  const { data } = await supabase
+  const primaryQuery = await supabase
     .from("profiles")
-    .select("id, full_name, email, instagram_handle, created_at")
+    .select("id, full_name, email, instagram_handle, participant_type, created_at")
     .eq("id", userId)
     .maybeSingle<ProfileRecord>();
 
-  return data ?? null;
+  if (!primaryQuery.error) {
+    return primaryQuery.data ?? null;
+  }
+
+  if (!hasMissingParticipantTypeColumn(primaryQuery.error)) {
+    return null;
+  }
+
+  const fallbackQuery = await supabase
+    .from("profiles")
+    .select("id, full_name, email, instagram_handle, created_at")
+    .eq("id", userId)
+    .maybeSingle<Omit<ProfileRecord, "participant_type">>();
+
+  if (!fallbackQuery.data) {
+    return null;
+  }
+
+  return {
+    ...fallbackQuery.data,
+    participant_type: null,
+  };
 }
 
 export async function getUserCheckIns(
@@ -59,13 +88,30 @@ export async function getUserCheckIns(
 export async function getAdminUserLookup(
   supabase: SupabaseClient,
 ): Promise<ProfileRecord[]> {
-  const { data } = await supabase
+  const primaryQuery = await supabase
     .from("profiles")
-    .select("id, full_name, email, instagram_handle, created_at")
+    .select("id, full_name, email, instagram_handle, participant_type, created_at")
     .order("created_at", { ascending: true })
     .returns<ProfileRecord[]>();
 
-  return data ?? [];
+  if (!primaryQuery.error) {
+    return primaryQuery.data ?? [];
+  }
+
+  if (!hasMissingParticipantTypeColumn(primaryQuery.error)) {
+    return [];
+  }
+
+  const fallbackQuery = await supabase
+    .from("profiles")
+    .select("id, full_name, email, instagram_handle, created_at")
+    .order("created_at", { ascending: true })
+    .returns<Omit<ProfileRecord, "participant_type">[]>();
+
+  return (fallbackQuery.data ?? []).map((profile) => ({
+    ...profile,
+    participant_type: null,
+  }));
 }
 
 export async function getAdminCheckIns(
@@ -75,20 +121,54 @@ export async function getAdminCheckIns(
   let query = supabase
     .from("check_ins")
     .select(
-      "id, user_id, check_in_date, caption, photo_url, created_at, profiles!check_ins_user_id_fkey ( id, full_name, email, instagram_handle )",
+      "id, user_id, check_in_date, caption, photo_url, created_at, profiles!check_ins_user_id_fkey ( id, full_name, email, instagram_handle, participant_type )",
     )
     .order("check_in_date", { ascending: false })
     .order("created_at", { ascending: false });
-
-  if (filters.userId) {
-    query = query.eq("user_id", filters.userId);
-  }
 
   if (filters.date) {
     query = query.eq("check_in_date", filters.date);
   }
 
-  const { data } = await query.returns<
+  const primaryQuery = await query.returns<
+    (DashboardCheckInItem & {
+      profiles:
+        | Pick<
+            ProfileRecord,
+            "id" | "full_name" | "email" | "instagram_handle" | "participant_type"
+          >
+        | Pick<
+            ProfileRecord,
+            "id" | "full_name" | "email" | "instagram_handle" | "participant_type"
+          >[]
+        | null;
+    })[]
+  >();
+
+  if (!primaryQuery.error) {
+    return (primaryQuery.data ?? []).map((item) => ({
+      ...item,
+      user: Array.isArray(item.profiles) ? item.profiles[0] ?? null : item.profiles,
+    }));
+  }
+
+  if (!hasMissingParticipantTypeColumn(primaryQuery.error)) {
+    return [];
+  }
+
+  let fallbackQuery = supabase
+    .from("check_ins")
+    .select(
+      "id, user_id, check_in_date, caption, photo_url, created_at, profiles!check_ins_user_id_fkey ( id, full_name, email, instagram_handle )",
+    )
+    .order("check_in_date", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (filters.date) {
+    fallbackQuery = fallbackQuery.eq("check_in_date", filters.date);
+  }
+
+  const { data } = await fallbackQuery.returns<
     (DashboardCheckInItem & {
       profiles:
         | Pick<ProfileRecord, "id" | "full_name" | "email" | "instagram_handle">
@@ -99,7 +179,13 @@ export async function getAdminCheckIns(
 
   return (data ?? []).map((item) => ({
     ...item,
-    user: Array.isArray(item.profiles) ? item.profiles[0] ?? null : item.profiles,
+    user: Array.isArray(item.profiles)
+      ? item.profiles[0]
+        ? { ...item.profiles[0], participant_type: null }
+        : null
+      : item.profiles
+        ? { ...item.profiles, participant_type: null }
+        : null,
   }));
 }
 

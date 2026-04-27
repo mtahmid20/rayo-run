@@ -15,6 +15,54 @@ function sanitizeHandle(handle: string) {
   return handle.trim().replace(/^@+/, "");
 }
 
+function hasMissingParticipantTypeColumn(error: { message?: string } | null) {
+  const message = error?.message?.toLowerCase() ?? "";
+  return message.includes("participant_type") && message.includes("column");
+}
+
+async function upsertParticipantProfile(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  payload: {
+    id?: string;
+    full_name: string;
+    email: string;
+    instagram_handle: string;
+    participant_type: "athlete" | "club";
+  },
+) {
+  const primaryUpsert = await supabase
+    .from("profiles")
+    .upsert(payload, {
+      onConflict: "email",
+    })
+    .select("id")
+    .single<{ id: string }>();
+
+  if (!primaryUpsert.error) {
+    return primaryUpsert;
+  }
+
+  if (!hasMissingParticipantTypeColumn(primaryUpsert.error)) {
+    return primaryUpsert;
+  }
+
+  return supabase
+    .from("profiles")
+    .upsert(
+      {
+        id: payload.id,
+        full_name: payload.full_name,
+        email: payload.email,
+        instagram_handle: payload.instagram_handle,
+      },
+      {
+        onConflict: "email",
+      },
+    )
+    .select("id")
+    .single<{ id: string }>();
+}
+
 export async function loginParticipant(
   _prevState: ParticipantActionState,
   formData: FormData,
@@ -78,21 +126,16 @@ export async function saveAthleteIdentity(
     return { error: lookupError.message };
   }
 
-  const { data: profile, error: upsertError } = await supabase
-    .from("profiles")
-    .upsert(
-      {
-        id: existingProfile?.id,
-        full_name: athleteName,
-        email,
-        instagram_handle: instagramHandle,
-      },
-      {
-        onConflict: "email",
-      },
-    )
-    .select("id")
-    .single<{ id: string }>();
+  const { data: profile, error: upsertError } = await upsertParticipantProfile(
+    supabase,
+    {
+      id: existingProfile?.id,
+      full_name: athleteName,
+      email,
+      instagram_handle: instagramHandle,
+      participant_type: "athlete",
+    },
+  );
 
   if (upsertError || !profile) {
     return { error: upsertError?.message ?? "Unable to save participant details." };
@@ -156,21 +199,16 @@ export async function saveParticipantIdentity(
     return { error: lookupError.message };
   }
 
-  const { data: profile, error: upsertError } = await supabase
-    .from("profiles")
-    .upsert(
-      {
-        id: existingProfile?.id,
-        full_name: clubName,
-        email,
-        instagram_handle: instagramHandle,
-      },
-      {
-        onConflict: "email",
-      },
-    )
-    .select("id")
-    .single<{ id: string }>();
+  const { data: profile, error: upsertError } = await upsertParticipantProfile(
+    supabase,
+    {
+      id: existingProfile?.id,
+      full_name: clubName,
+      email,
+      instagram_handle: instagramHandle,
+      participant_type: "club",
+    },
+  );
 
   if (upsertError || !profile) {
     return { error: upsertError?.message ?? "Unable to save participant details." };

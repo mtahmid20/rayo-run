@@ -46,8 +46,6 @@ export default async function DashboardPage() {
   const existingDates = checkIns.map((item) => item.check_in_date);
   const publicApiKey = process.env.NEXT_PUBLIC_KLAVIYO_PUBLIC_API_KEY ?? null;
   const firstName = profile.full_name.split(" ")[0] || profile.full_name;
-  const today = new Date().toISOString().slice(0, 10);
-  const checkedInToday = existingDates.includes(today);
 
   return (
     <main className="min-h-screen bg-[var(--black)] text-[var(--white)]">
@@ -76,7 +74,7 @@ export default async function DashboardPage() {
         </div>
       </nav>
 
-      <section className="max-w-6xl px-5 py-9 sm:px-9">
+      <section className="mx-auto w-full max-w-[1440px] px-5 py-9 sm:px-9">
         <div className="mb-8">
           <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--yellow)]">
             La Comunidad Portal
@@ -85,8 +83,7 @@ export default async function DashboardPage() {
             Welcome back, <span className="text-[var(--yellow)]">{firstName}</span>
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-            Miles. Fuel. Rep. Keep showing up, log today&apos;s proof, and build
-            your streak one day at a time.
+            Miles. Fuel. Rep. Keep showing up and log this month&apos;s content!
           </p>
         </div>
 
@@ -95,12 +92,11 @@ export default async function DashboardPage() {
           <span>| Ambassador check-in portal</span>
         </div>
 
-        <section className="mb-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="mb-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            ["Current streak", currentStreak, "days in a row", true],
+            ["Current month submissions", currentStreak, "content pieces logged", true],
             ["Total reps", checkIns.length, "proof uploads", false],
             ["Last rep", getLastCheckInLabel(checkIns), "latest logged day", false],
-            ["Today", checkedInToday ? "Done" : "Open", "daily rep status", true],
           ].map(([label, value, sub, yellow]) => (
             <div
               key={label.toString()}
@@ -123,8 +119,7 @@ export default async function DashboardPage() {
 
         <section className="mb-6 rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <p className="text-sm font-medium">Road to 30</p>
-            <p className="font-mono text-xs text-[var(--muted)]">Goal: consistent daily reps</p>
+            <p className="text-sm font-medium">Road to the next tier</p>
           </div>
           <div className="h-2 overflow-hidden rounded bg-[var(--black-4)]">
             <div
@@ -141,10 +136,10 @@ export default async function DashboardPage() {
         <section className="grid gap-4 lg:grid-cols-2">
           <div className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
             <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
-              Daily proof
+              Proof
             </p>
             <p className="mb-4 text-sm text-[var(--muted)]">
-              Upload today&apos;s photo and leave a note if you want to give the
+              Upload this month&apos;s content and leave a note if you want to give the
               rep some context.
             </p>
             <CheckInForm existingDates={existingDates} />
@@ -152,10 +147,10 @@ export default async function DashboardPage() {
 
           <div className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
             <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
-              Recent reps
+              Recent
             </p>
             <p className="mb-4 text-sm text-[var(--muted)]">
-              Your latest uploads, captions, and proof from La Comunidad.
+              Your latest uploads and captions.
             </p>
 
             {checkIns.length ? (

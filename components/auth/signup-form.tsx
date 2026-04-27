@@ -39,7 +39,7 @@ export function SignupForm() {
         <input
           type="text"
           name="instagram_handle"
-          placeholder="@rayoathlete"
+          placeholder="@rayoaccount"
           className="min-h-12 w-full rounded-2xl border border-white/10 bg-black/35 px-4 text-white outline-none transition focus:border-[#ff6f00]"
           required
         />

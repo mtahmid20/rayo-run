@@ -122,7 +122,7 @@ export default async function HomePage() {
               We run together. We ride together. We fuel together.
             </p>
             <p>
-              Join our growing community of athletes making it happen every day.
+              Join our growing community of athletes and clubs making it happen every day.
             </p>
             <p className="text-[var(--white)]">
               Siempre juntos.
