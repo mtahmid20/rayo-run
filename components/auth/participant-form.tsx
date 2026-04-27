@@ -14,12 +14,12 @@ export function ParticipantForm() {
     <form action={action} className="space-y-4">
       <label className="block space-y-2">
         <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
-          Full name
+          Club name
         </span>
         <input
           type="text"
-          name="full_name"
-          placeholder="Your full name"
+          name="club_name"
+          placeholder="Rayo Run Club"
           className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
@@ -40,12 +40,51 @@ export function ParticipantForm() {
 
       <label className="block space-y-2">
         <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+          Avg number of attendees
+        </span>
+        <input
+          type="text"
+          name="average_attendees"
+          placeholder="25"
+          className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
+          required
+        />
+      </label>
+
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+          What day(s) do you meet
+        </span>
+        <input
+          type="text"
+          name="meeting_days"
+          placeholder="Tuesday and Saturday"
+          className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
+          required
+        />
+      </label>
+
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
+          Where do you meet
+        </span>
+        <input
+          type="text"
+          name="meeting_location"
+          placeholder="Prospect Park, Brooklyn"
+          className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
+          required
+        />
+      </label>
+
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">
           Instagram handle
         </span>
         <input
           type="text"
           name="instagram_handle"
-          placeholder="@yourhandle"
+          placeholder="@yourclub"
           className="min-h-12 w-full rounded-md border border-[var(--black-5)] bg-[var(--black-3)] px-4 text-sm text-[var(--white)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--yellow)]"
           required
         />
@@ -63,7 +102,7 @@ export function ParticipantForm() {
         </p>
       ) : null}
 
-      <SubmitButton label="Enter La Comunidad" pendingLabel="Saving your spot..." />
+      <SubmitButton label="Enter La Comunidad" pendingLabel="Saving your club..." />
     </form>
   );
 }

@@ -44,9 +44,8 @@ export default async function JoinPage() {
 
           <div className="mt-10 space-y-3">
             {[
-              "Use the same name, email, and Instagram handle every time",
-              "Drop in daily with photo proof and an optional caption",
-              "Keep your streak moving and your reps visible",
+              "Use the same club name, email, and Instagram handle every time",
+              "Drop in your monthly content!",
             ].map((item) => (
               <div
                 key={item}
@@ -67,9 +66,9 @@ export default async function JoinPage() {
               Enter La Comunidad
             </h2>
             <p className="mt-4 max-w-lg text-sm leading-7 text-[var(--muted-2)]">
-              Keep it simple. Put in your details below and we&apos;ll use them as
-              your portal identity whenever you come back to log miles, fuel,
-              and daily proof.
+              Keep it simple. Put in your club details below and we&apos;ll use
+              them as your portal identity whenever you come back to submit
+              content and stay in the program flow.
             </p>
           </div>
           <ParticipantForm />

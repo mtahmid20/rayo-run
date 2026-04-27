@@ -19,15 +19,27 @@ export async function saveParticipantIdentity(
   _prevState: ParticipantActionState,
   formData: FormData,
 ): Promise<ParticipantActionState> {
-  const fullName = String(formData.get("full_name") ?? "").trim();
+  const clubName = String(formData.get("club_name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const averageAttendees = String(formData.get("average_attendees") ?? "").trim();
+  const meetingDays = String(formData.get("meeting_days") ?? "").trim();
+  const meetingLocation = String(formData.get("meeting_location") ?? "").trim();
   const instagramHandle = sanitizeHandle(
     String(formData.get("instagram_handle") ?? ""),
   );
 
-  if (!fullName || !email || !instagramHandle) {
+  if (
+    !clubName ||
+    !email ||
+    !averageAttendees ||
+    !meetingDays ||
+    !meetingLocation ||
+    !instagramHandle
+  ) {
     return { error: "Please complete every field before continuing." };
   }
+
+  const averageAttendeesNumber = Number(averageAttendees);
 
   const supabase = await createClient();
   const { data: existingProfile, error: lookupError } = await supabase
@@ -45,7 +57,7 @@ export async function saveParticipantIdentity(
     .upsert(
       {
         id: existingProfile?.id,
-        full_name: fullName,
+        full_name: clubName,
         email,
         instagram_handle: instagramHandle,
       },
@@ -63,10 +75,16 @@ export async function saveParticipantIdentity(
   try {
     await syncKlaviyoSignup({
       email,
-      fullName,
+      fullName: clubName,
       instagramHandle,
       properties: {
         participant_id: profile.id,
+        club_name: clubName,
+        avg_number_of_attendees: Number.isFinite(averageAttendeesNumber)
+          ? averageAttendeesNumber
+          : averageAttendees,
+        meeting_days: meetingDays,
+        meeting_location: meetingLocation,
       },
     });
   } catch (error) {

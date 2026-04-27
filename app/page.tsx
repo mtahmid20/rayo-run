@@ -3,19 +3,12 @@ import { redirect } from "next/navigation";
 
 import { getParticipantIdFromCookie } from "@/lib/session";
 
-const stats = [
-  ["10%", "starting commission"],
-  ["2", "ambassador tiers"],
-  ["15%", "follower discount"],
-  ["$0", "cost to apply"],
-];
-
 const tiers = [
   {
     badge: "Athletes - Tier 1",
     name: "Tier 1",
     items: [
-      "15% follower discount code",
+      "20% follower discount code",
       "10% commission on all code sales",
       "1-2 UGC posts/month required",
       "Buy a box to activate",
@@ -27,8 +20,8 @@ const tiers = [
     featured: true,
     items: [
       "30% off all personal purchases",
-      "15% commission on all code sales",
-      "Keep 15% follower discount",
+      "20% commission on all code sales",
+      "Keep 20% follower discount",
       "2x UGC posts/month required",
     ],
   },
@@ -36,7 +29,7 @@ const tiers = [
     badge: "Run Clubs",
     name: "Clubs",
     items: [
-      "20-40 free sample gels",
+      "Free samples for club",
       "20% club discount code",
       "20% commission as store credit",
     ],
@@ -100,13 +93,7 @@ export default async function HomePage() {
               href="/join"
               className="rounded-lg bg-[var(--yellow)] px-8 py-3.5 text-sm font-medium text-black transition hover:-translate-y-0.5 hover:bg-[var(--yellow-dim)]"
             >
-              Join the Challenge
-            </Link>
-            <Link
-              href="#tiers"
-              className="rounded-lg border border-[#333] px-8 py-3.5 text-sm font-medium text-[var(--white)] transition hover:border-[#555] hover:bg-[var(--black-3)]"
-            >
-              See the Structure
+              Join the Program
             </Link>
           </div>
         </div>
@@ -116,10 +103,10 @@ export default async function HomePage() {
             What is La Comunidad?
           </p>
           <div className="space-y-4 text-sm leading-7 text-[var(--muted-2)]">
+            <p>La Comunidad is exactly that, a community.</p>
             <p>
-              La Comunidad is exactly that, a community. Where runners,
-              cyclists, everyday athletes chasing something bigger and enjoying
-              the miles while we&apos;re at it.
+              Where runners, cyclists, everyday athletes chasing something
+              bigger and enjoying the miles while we&apos;re at it.
             </p>
             <p>
               We care about how we fuel, how it tastes, how we move, and how we
@@ -144,22 +131,6 @@ export default async function HomePage() {
             </p>
           </div>
         </div>
-      </section>
-
-      <section className="relative z-10 grid border-y border-[#1f1f1f] sm:grid-cols-4">
-        {stats.map(([num, desc]) => (
-          <div
-            key={desc}
-            className="border-b border-[#1f1f1f] px-5 py-7 sm:border-b-0 sm:border-r sm:px-12 last:sm:border-r-0"
-          >
-            <p className="font-display text-5xl leading-none text-[var(--yellow)]">
-              {num}
-            </p>
-            <p className="mt-1 text-xs uppercase tracking-[0.12em] text-[var(--muted)]">
-              {desc}
-            </p>
-          </div>
-        ))}
       </section>
 
       <section id="tiers" className="relative z-10 px-5 py-20 sm:px-12">
@@ -241,30 +212,11 @@ export default async function HomePage() {
         </div>
         <div className="bg-[var(--yellow)] px-5 py-16 text-black sm:px-12">
           <h2 className="font-display text-6xl">Run Clubs</h2>
-          <div className="mt-4 max-w-xl space-y-4 text-sm leading-7 text-black/70">
-            <p>
-              La Comunidad is exactly that, a community. Crews that show up
-              together, push each other, and make the miles mean more.
-            </p>
-            <p>
-              You&apos;re not just chasing miles, you&apos;re building something. A
-              culture, a rhythm, a reason people keep coming back.
-            </p>
-            <p>
-              We care about how we fuel, how we move, and how we show up for
-              each other every time we lace up.
-            </p>
-            <p>
-              If this sounds like your club, we&apos;d love to partner with you too.
-              Rayo is here to support the miles, the moments, and the people
-              behind them.
-            </p>
-            <p>
-              Siempre juntas.
-              <br />
-              Fuel the joy.
-            </p>
-          </div>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-black/70">
+            Build for crews that show up together. Get sample gels for your
+            whole club, a custom discount code, and rep Rayo at every
+            activation.
+          </p>
           <Link
             href="/join"
             className="mt-8 inline-flex rounded-md bg-black px-7 py-3 text-sm font-medium text-[var(--white)] hover:bg-[#222]"
