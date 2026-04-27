@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { ParticipantForm } from "@/components/auth/participant-form";
+import { RegistrationSwitcher } from "@/components/auth/registration-switcher";
 import { getParticipantIdFromCookie } from "@/lib/session";
 
 export default async function JoinPage() {
@@ -44,7 +44,7 @@ export default async function JoinPage() {
 
           <div className="mt-10 space-y-3">
             {[
-              "Use the same club name, email, and Instagram handle every time",
+              "Use the same email and Instagram handle every time",
               "Drop in your monthly content!",
             ].map((item) => (
               <div
@@ -66,12 +66,12 @@ export default async function JoinPage() {
               Enter La Comunidad
             </h2>
             <p className="mt-4 max-w-lg text-sm leading-7 text-[var(--muted-2)]">
-              Keep it simple. Put in your club details below and we&apos;ll use
-              them as your portal identity whenever you come back to submit
-              content and stay in the program flow.
+              Choose the path that fits you. Athletes and clubs each get their
+              own application, and we&apos;ll use your email plus Instagram handle
+              when you come back to log in later.
             </p>
           </div>
-          <ParticipantForm />
+          <RegistrationSwitcher />
           <Link
             href="/"
             className="mt-6 block text-center text-xs text-[var(--muted)] hover:text-[var(--white)]"

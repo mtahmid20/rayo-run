@@ -40,11 +40,79 @@ export async function loginParticipant(
   }
 
   if (!profile) {
-    return { error: "We couldn't find a club with those details." };
+    return { error: "We couldn't find a profile with those details." };
   }
 
   if (sanitizeHandle(profile.instagram_handle) !== instagramHandle) {
     return { error: "That email and Instagram handle don't match our records." };
+  }
+
+  await setParticipantCookie(profile.id);
+  redirect("/dashboard");
+}
+
+export async function saveAthleteIdentity(
+  _prevState: ParticipantActionState,
+  formData: FormData,
+): Promise<ParticipantActionState> {
+  const athleteName = String(formData.get("athlete_name") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const sport = String(formData.get("sport") ?? "").trim();
+  const whyAmbassador = String(formData.get("why_ambassador") ?? "").trim();
+  const instagramHandle = sanitizeHandle(
+    String(formData.get("instagram_handle") ?? ""),
+  );
+
+  if (!athleteName || !email || !sport || !instagramHandle || !whyAmbassador) {
+    return { error: "Please complete every field before continuing." };
+  }
+
+  const supabase = await createClient();
+  const { data: existingProfile, error: lookupError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle<{ id: string }>();
+
+  if (lookupError) {
+    return { error: lookupError.message };
+  }
+
+  const { data: profile, error: upsertError } = await supabase
+    .from("profiles")
+    .upsert(
+      {
+        id: existingProfile?.id,
+        full_name: athleteName,
+        email,
+        instagram_handle: instagramHandle,
+      },
+      {
+        onConflict: "email",
+      },
+    )
+    .select("id")
+    .single<{ id: string }>();
+
+  if (upsertError || !profile) {
+    return { error: upsertError?.message ?? "Unable to save participant details." };
+  }
+
+  try {
+    await syncKlaviyoSignup({
+      email,
+      fullName: athleteName,
+      instagramHandle,
+      properties: {
+        participant_id: profile.id,
+        participant_type: "athlete",
+        athlete_name: athleteName,
+        sport,
+        ambassador_reason: whyAmbassador,
+      },
+    });
+  } catch (error) {
+    console.error("Klaviyo signup sync failed", error);
   }
 
   await setParticipantCookie(profile.id);
@@ -115,6 +183,7 @@ export async function saveParticipantIdentity(
       instagramHandle,
       properties: {
         participant_id: profile.id,
+        participant_type: "club",
         club_name: clubName,
         avg_number_of_attendees: Number.isFinite(averageAttendeesNumber)
           ? averageAttendeesNumber
