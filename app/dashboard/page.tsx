@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   const participantId = await getParticipantIdFromCookie();
 
   if (!participantId) {
-    redirect("/join");
+    redirect("/login");
   }
 
   const supabase = await createClient();
@@ -38,7 +38,7 @@ export default async function DashboardPage() {
   ]);
 
   if (!profile) {
-    redirect("/join");
+    redirect("/login");
   }
 
   const checkIns = await enrichCheckInsWithSignedUrls(supabase, rawCheckIns);

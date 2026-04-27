@@ -58,7 +58,7 @@ export default async function HomePage() {
         </Link>
         <div className="flex gap-2">
           <Link
-            href="/join"
+            href="/login"
             className="rounded-md border border-[#333] px-4 py-2 text-xs text-[var(--white-2)] transition hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
           >
             Login

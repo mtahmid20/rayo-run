@@ -15,6 +15,42 @@ function sanitizeHandle(handle: string) {
   return handle.trim().replace(/^@+/, "");
 }
 
+export async function loginParticipant(
+  _prevState: ParticipantActionState,
+  formData: FormData,
+): Promise<ParticipantActionState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const instagramHandle = sanitizeHandle(
+    String(formData.get("instagram_handle") ?? ""),
+  );
+
+  if (!email || !instagramHandle) {
+    return { error: "Please enter your email and Instagram handle." };
+  }
+
+  const supabase = await createClient();
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("id, instagram_handle")
+    .eq("email", email)
+    .maybeSingle<{ id: string; instagram_handle: string }>();
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  if (!profile) {
+    return { error: "We couldn't find a club with those details." };
+  }
+
+  if (sanitizeHandle(profile.instagram_handle) !== instagramHandle) {
+    return { error: "That email and Instagram handle don't match our records." };
+  }
+
+  await setParticipantCookie(profile.id);
+  redirect("/dashboard");
+}
+
 export async function saveParticipantIdentity(
   _prevState: ParticipantActionState,
   formData: FormData,
@@ -97,5 +133,5 @@ export async function saveParticipantIdentity(
 
 export async function clearParticipantIdentity() {
   await clearParticipantCookie();
-  redirect("/join");
+  redirect("/login");
 }
