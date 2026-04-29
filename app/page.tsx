@@ -82,7 +82,7 @@ export default async function HomePage() {
             <br />
             <span>Fuel</span>
             <br />
-            <span className="text-[var(--yellow)]">REP.</span>
+            <span className="text-[var(--yellow)]">CONTENT.</span>
           </h1>
           <p className="mt-7 max-w-xl text-[17px] leading-8 text-[var(--muted-2)]">
             Join Rayo&apos;s ambassador program. Earn commissions, get product,
@@ -214,7 +214,7 @@ export default async function HomePage() {
           <h2 className="font-display text-6xl">Run Clubs</h2>
           <p className="mt-4 max-w-xl text-sm leading-7 text-black/70">
             Build for crews that show up together. Get sample gels for your
-            whole club, a custom discount code, and rep Rayo at every
+            whole club, a custom discount code, and show up with Rayo at every
             activation.
           </p>
           <Link

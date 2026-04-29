@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Rayo Challenge",
   description:
-    "A daily fitness challenge app for check-ins, photo proof, streak tracking, and community momentum.",
+    "A content portal for athlete and club uploads, account tracking, and community momentum.",
   metadataBase: new URL("https://example.com"),
 };
 

@@ -31,14 +31,14 @@ export async function createCheckIn(
 
   const localDate = String(formData.get("local_date") ?? "").trim();
   const caption = String(formData.get("caption") ?? "").trim();
-  const photo = formData.get("photo");
+  const contentFile = formData.get("content_file");
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(localDate)) {
     return { error: "We could not determine today’s local date. Refresh and try again." };
   }
 
-  if (!(photo instanceof File) || photo.size === 0) {
-    return { error: "A proof photo is required for each daily check-in." };
+  if (!(contentFile instanceof File) || contentFile.size === 0) {
+    return { error: "A photo or video file is required for each content submission." };
   }
 
   const { data: existingCheckIn } = await supabase
@@ -49,20 +49,22 @@ export async function createCheckIn(
     .maybeSingle();
 
   if (existingCheckIn) {
-    return { error: "Today’s check-in is already complete." };
+    return { error: "Today’s submission is already saved." };
   }
 
   const extension =
-    photo.name.includes(".") ? photo.name.split(".").pop()?.toLowerCase() : "jpg";
-  const safeFileName = sanitizeFileName(photo.name || `proof.${extension}`);
+    contentFile.name.includes(".")
+      ? contentFile.name.split(".").pop()?.toLowerCase()
+      : "jpg";
+  const safeFileName = sanitizeFileName(contentFile.name || `upload.${extension}`);
   const storagePath = `${participantId}/${localDate}/${Date.now()}-${safeFileName}`;
 
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKET)
-    .upload(storagePath, photo, {
+    .upload(storagePath, contentFile, {
       cacheControl: "3600",
       upsert: false,
-      contentType: photo.type || undefined,
+      contentType: contentFile.type || undefined,
     });
 
   if (uploadError) {
@@ -112,5 +114,5 @@ export async function createCheckIn(
   revalidatePath("/dashboard");
   revalidatePath("/admin");
 
-  return { success: "Check-in complete. Your streak is updated." };
+  return { success: "Content saved successfully." };
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AdminAccessForm } from "@/components/admin/admin-access-form";
+import { DeleteContentButton } from "@/components/admin/delete-content-button";
 import { SignOutButton } from "@/components/shared/sign-out-button";
 import {
   AdminCheckInItem,
@@ -9,7 +10,9 @@ import {
   getAdminCheckIns,
   getAdminUserLookup,
 } from "@/lib/data";
+import { formatFileSize } from "@/lib/files";
 import { formatCheckInDate } from "@/lib/format";
+import { isVideoAsset } from "@/lib/media";
 import { hasAdminAccess } from "@/lib/session";
 import { calculateCurrentStreak } from "@/lib/streaks";
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +28,7 @@ type AdminPageProps = {
 const adminSections = [
   { id: "overview", label: "Overview", description: "Big picture on La Comunidad" },
   { id: "accounts", label: "Accounts", description: "Athletes, clubs, and activity" },
-  { id: "images", label: "Images", description: "Proof uploads and captions" },
+  { id: "images", label: "Media", description: "Uploads, captions, and downloads" },
 ];
 
 type ParticipantTypeFilter = "all" | "athlete" | "club";
@@ -145,8 +148,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             Enter the backroom
           </h1>
           <p className="mt-3 text-sm leading-6 text-[var(--muted-2)]">
-            Use the shared key to review ambassadors, reps, images, and streak
-            movement across the program.
+            Use the shared key to review athletes, clubs, uploads, and account
+            activity across the program.
           </p>
           <div className="mt-7">
             <AdminAccessForm />
@@ -218,12 +221,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--yellow)]">
-                Miles. Fuel. Rep.
+                Miles. Fuel. Content.
               </p>
               <h1 className="font-display text-6xl leading-none">La Comunidad Admin</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-                Review athletes, clubs, proof uploads, and streak movement across
-                the ambassador program in one place.
+                Review athletes, clubs, uploads, and account activity across the
+                ambassador program in one place.
               </p>
             </div>
             <div className="flex gap-2">
@@ -386,10 +389,10 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               <div className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-5">
                 <div className="mb-4">
                   <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
-                    Recent reps
+                    Recent uploads
                   </p>
                   <p className="mt-1 text-sm text-[var(--muted)]">
-                    Latest proof uploads across the currently visible records.
+                    Latest content uploads across the currently visible records.
                   </p>
                 </div>
 
@@ -401,19 +404,28 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                       return (
                         <article
                           key={item.id}
-                          className="grid gap-4 rounded-md bg-[var(--black-3)] p-4 md:grid-cols-[130px_1fr]"
+                          className="grid items-start gap-4 rounded-md bg-[var(--black-3)] p-4 md:grid-cols-[130px_1fr]"
                         >
-                          <div className="overflow-hidden rounded-md bg-[var(--black-4)]">
+                          <div className="self-start overflow-hidden rounded-md bg-[var(--black-4)]">
                             {item.signedPhotoUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={item.signedPhotoUrl}
-                                alt={`Proof from ${item.user?.full_name ?? item.user?.email ?? "participant"}`}
-                                className="h-32 w-full object-cover"
-                              />
+                              isVideoAsset(item.photo_url) ? (
+                                <video
+                                  src={item.signedPhotoUrl}
+                                  controls
+                                  preload="metadata"
+                                  className="block h-32 w-full object-cover"
+                                />
+                              ) : (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={item.signedPhotoUrl}
+                                  alt={`Upload from ${item.user?.full_name ?? item.user?.email ?? "participant"}`}
+                                  className="block h-32 w-full object-cover"
+                                />
+                              )
                             ) : (
                               <div className="flex h-32 items-center justify-center text-xs text-[var(--muted)]">
-                                No photo
+                                No media
                               </div>
                             )}
                           </div>
@@ -437,9 +449,27 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                             <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--yellow)]">
                               {formatCheckInDate(item.check_in_date)}
                             </p>
+                            <p className="mt-2 text-xs text-[var(--muted)]">
+                              {formatFileSize(item.fileSize)}
+                              {item.mimeType ? ` | ${item.mimeType}` : ""}
+                            </p>
                             <p className="mt-2 text-sm leading-6 text-[var(--muted-2)]">
                               {item.caption || "No caption provided."}
                             </p>
+                            {item.signedPhotoUrl ? (
+                              <div className="mt-4 flex flex-wrap gap-2">
+                                <a
+                                  href={item.signedPhotoUrl}
+                                  download
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex rounded-md border border-[#333] px-3 py-2 text-xs text-[var(--muted-2)] hover:border-[var(--yellow)] hover:text-[var(--white)]"
+                                >
+                                  Download file
+                                </a>
+                                <DeleteContentButton checkInId={item.id} />
+                              </div>
+                            ) : null}
                           </div>
                         </article>
                       );
@@ -447,7 +477,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                   </div>
                 ) : (
                   <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-[var(--muted)]">
-                    No reps match the current filters.
+                    No uploads match the current filters.
                   </div>
                 )}
               </div>
@@ -498,7 +528,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                       </div>
                       <div>
                         <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
-                          Total reps
+                          Total uploads
                         </p>
                         <p className="mt-1 text-lg text-[var(--white)]">
                           {checkInCounts.get(profile.id) ?? 0}
@@ -511,7 +541,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                         <p className="mt-1 text-sm text-[var(--white)]">
                           {latestDates.get(profile.id)
                             ? formatCheckInDate(latestDates.get(profile.id)!)
-                            : "No reps yet"}
+                            : "No uploads yet"}
                         </p>
                       </div>
                     </article>
@@ -525,10 +555,10 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             <section className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-5">
               <div className="mb-4">
                 <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
-                  Images
+                  Media
                 </p>
                 <p className="mt-1 text-sm text-[var(--muted)]">
-                  Proof uploads, captions, and clear athlete or club tags on every card.
+                  Uploads, captions, downloads, and clear athlete or club tags on every card.
                 </p>
               </div>
 
@@ -544,15 +574,24 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                       >
                         <div className="aspect-[4/3] bg-[var(--black-4)]">
                           {item.signedPhotoUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={item.signedPhotoUrl}
-                              alt={`Proof from ${item.user?.full_name ?? item.user?.email ?? "participant"}`}
-                              className="h-full w-full object-cover"
-                            />
+                            isVideoAsset(item.photo_url) ? (
+                              <video
+                                src={item.signedPhotoUrl}
+                                controls
+                                preload="metadata"
+                                className="block h-full w-full object-cover"
+                              />
+                            ) : (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={item.signedPhotoUrl}
+                                alt={`Upload from ${item.user?.full_name ?? item.user?.email ?? "participant"}`}
+                                className="block h-full w-full object-cover"
+                              />
+                            )
                           ) : (
                             <div className="flex h-full items-center justify-center text-xs text-[var(--muted)]">
-                              No photo
+                              No media
                             </div>
                           )}
                         </div>
@@ -570,9 +609,27 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                           <p className="mt-1 text-xs text-[var(--muted)]">
                             {formatCheckInDate(item.check_in_date)}
                           </p>
+                          <p className="mt-2 text-xs text-[var(--muted)]">
+                            {formatFileSize(item.fileSize)}
+                            {item.mimeType ? ` | ${item.mimeType}` : ""}
+                          </p>
                           <p className="mt-3 text-sm leading-6 text-[var(--muted-2)]">
                             {item.caption || "No caption provided."}
                           </p>
+                          {item.signedPhotoUrl ? (
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <a
+                                href={item.signedPhotoUrl}
+                                download
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex rounded-md border border-[#333] px-3 py-2 text-xs text-[var(--muted-2)] hover:border-[var(--yellow)] hover:text-[var(--white)]"
+                              >
+                                Download file
+                              </a>
+                              <DeleteContentButton checkInId={item.id} />
+                            </div>
+                          ) : null}
                         </div>
                       </article>
                     );
@@ -580,7 +637,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 </div>
               ) : (
                 <div className="rounded-md border border-dashed border-[#333] p-8 text-center text-sm text-[var(--muted)]">
-                  No reps match the current filters.
+                  No uploads match the current filters.
                 </div>
               )}
             </section>

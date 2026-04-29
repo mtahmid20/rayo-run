@@ -31,7 +31,7 @@ export default async function LoginPage() {
 
           <div className="mt-14">
             <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--yellow)]">
-              Miles. Fuel. Rep.
+              Miles. Fuel. Content.
             </p>
             <h1 className="font-display text-6xl leading-none tracking-[0.03em] sm:text-7xl">
               Welcome back

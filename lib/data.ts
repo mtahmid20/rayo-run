@@ -19,6 +19,8 @@ export type DashboardCheckInItem = {
   photo_url: string;
   created_at: string;
   signedPhotoUrl?: string | null;
+  fileSize?: number | null;
+  mimeType?: string | null;
 };
 
 export type AdminCheckInItem = DashboardCheckInItem & {
@@ -193,17 +195,53 @@ export async function enrichCheckInsWithSignedUrls<
   T extends {
     photo_url: string;
   },
->(supabase: SupabaseClient, checkIns: T[]): Promise<(T & { signedPhotoUrl: string | null })[]> {
+>(
+  supabase: SupabaseClient,
+  checkIns: T[],
+): Promise<(T & { signedPhotoUrl: string | null; fileSize: number | null; mimeType: string | null })[]> {
   return Promise.all(
     checkIns.map(async (item) => {
-      const { data } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .createSignedUrl(item.photo_url, 60 * 60);
+      const [signedUrlResult, metadataResult] = await Promise.all([
+        supabase.storage.from(STORAGE_BUCKET).createSignedUrl(item.photo_url, 60 * 60),
+        getStorageObjectMetadata(supabase, item.photo_url),
+      ]);
 
       return {
         ...item,
-        signedPhotoUrl: data?.signedUrl ?? null,
+        signedPhotoUrl: signedUrlResult.data?.signedUrl ?? null,
+        fileSize: metadataResult.fileSize,
+        mimeType: metadataResult.mimeType,
       };
     }),
   );
+}
+
+async function getStorageObjectMetadata(supabase: SupabaseClient, objectPath: string) {
+  const lastSlashIndex = objectPath.lastIndexOf("/");
+  const folder = lastSlashIndex >= 0 ? objectPath.slice(0, lastSlashIndex) : "";
+  const fileName = lastSlashIndex >= 0 ? objectPath.slice(lastSlashIndex + 1) : objectPath;
+
+  const { data } = await supabase.storage.from(STORAGE_BUCKET).list(folder, {
+    limit: 100,
+    search: fileName,
+  });
+
+  const object = (data ?? []).find((entry) => entry.name === fileName);
+  const metadata = object?.metadata as
+    | { size?: number | string; mimetype?: string | null }
+    | null
+    | undefined;
+
+  const rawSize = metadata?.size;
+  const fileSize =
+    typeof rawSize === "number"
+      ? rawSize
+      : typeof rawSize === "string"
+        ? Number(rawSize)
+        : null;
+
+  return {
+    fileSize: Number.isFinite(fileSize) ? fileSize : null,
+    mimeType: metadata?.mimetype ?? null,
+  };
 }
