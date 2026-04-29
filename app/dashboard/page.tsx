@@ -118,22 +118,6 @@ export default async function DashboardPage() {
           ))}
         </section>
 
-        <section className="mb-6 rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <p className="text-sm font-medium">Road to the next tier</p>
-          </div>
-          <div className="h-2 overflow-hidden rounded bg-[var(--black-4)]">
-            <div
-              className="h-full rounded bg-[var(--yellow)] transition-all"
-              style={{ width: `${Math.min(100, Math.round((currentStreak / 30) * 100))}%` }}
-            />
-          </div>
-          <div className="mt-2 flex justify-between text-xs text-[var(--muted)]">
-            <span>{currentStreak} / 30</span>
-            <span>30</span>
-          </div>
-        </section>
-
         <section className="grid gap-4 lg:grid-cols-2">
           <div className="rounded-lg border border-[#1f1f1f] bg-[var(--black-2)] p-6">
             <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--muted-2)]">
@@ -202,6 +186,17 @@ export default async function DashboardPage() {
             )}
           </div>
         </section>
+
+        <p className="mt-8 text-center text-sm text-[var(--muted)]">
+          For issues or support please email{" "}
+          <a
+            href="mailto:info@rayoenergy.com"
+            className="text-[var(--yellow)] hover:text-[var(--yellow-dim)]"
+          >
+            info@rayoenergy.com
+          </a>
+          .
+        </p>
       </section>
     </main>
   );
